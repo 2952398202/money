@@ -278,7 +278,7 @@
     <div class="container">
         <div class="header">
             <h1>全天候交易组合管理</h1>
-            <p>智能资产配置与再平衡建议系统</p>
+            <p>智能资产配置与再平衡操作系统</p>
         </div>
         
         <div class="content">
@@ -678,20 +678,30 @@
                     if (assetKey === 'bond30' && allocation > 0) {
                         const currentBond30 = currentAmounts.bond30;
                         const currentBond3_5 = currentAmounts.bond3_5;
-                        const totalBondAfter = currentBond30 + allocation + currentBond3_5;
+                        const totalBondCurrent = currentBond30 + currentBond3_5;
+                        const totalBondAfter = totalBondCurrent + allocation;
                         
                         if (totalBondAfter > 0) {
-                            const bond30RatioAfter = (currentBond30 / totalBondAfter) * 100;
+                            // 计算当前30年国债比例
+                            const bond30RatioCurrent = totalBondCurrent > 0 ? (currentBond30 / totalBondCurrent) * 100 : 0;
                             const targetBond30Ratio = 72.7; // 目标比例
-                            const ratioDeviation = Math.abs(bond30RatioAfter - targetBond30Ratio);
                             
-                            console.log(`买入后30年国债比例: ${bond30RatioAfter.toFixed(1)}%, 目标: ${targetBond30Ratio}%, 偏差: ${ratioDeviation.toFixed(1)}%`);
+                            console.log(`当前30年国债比例: ${bond30RatioCurrent.toFixed(1)}%, 目标: ${targetBond30Ratio}%`);
                             
-                            // 如果比例偏差超过5%，认为调整过度，重新分配
-                            if (ratioDeviation > 5) {
-                                console.log(`比例偏差${ratioDeviation.toFixed(1)}%超过5%，重新分配资金给3-5年国债`);
+                            // 修改逻辑：如果当前比例已经低于目标比例，应该允许买入以接近目标
+                            // 只有当当前比例已经高于目标比例且买入后会进一步偏离时才跳过
+                            if (bond30RatioCurrent > targetBond30Ratio && bond30RatioCurrent > targetBond30Ratio + 5) {
+                                console.log(`当前比例${bond30RatioCurrent.toFixed(1)}%已高于目标且偏差超过5%，暂停买入30年国债`);
                                 allocation = 0;
-                                console.log(`调整后：30年国债不买入，资金转给3-5年国债`);
+                                console.log(`调整后：30年国债不买入，资金可分配给其他需要的资产`);
+                            } else {
+                                console.log(`30年国债比例在合理范围内或低于目标，允许买入`);
+                                
+                                // 再次检查：确保分配金额不小于最小买入金额
+                                if (allocation < minBond30Amount) {
+                                    console.log(`分配金额${allocation}小于最小买入金额${minBond30Amount}，跳过30年国债买入`);
+                                    allocation = 0;
+                                }
                             }
                         }
                     }
@@ -705,13 +715,25 @@
                 
                 // 将剩余资金全部分配给最后的债券资产
                 if (remainingFunds > 0.01) {
-                    // 优先分配给bond3_5，如果不存在则分配给bond30
-                    if (prioritizedAssets.includes('bond3_5')) {
+                    // 修改逻辑：即使bond3_5在卖出列表中，剩余资金也应该分配给债券类资产
+                    // 优先分配给bond3_5，如果无法分配则分配给bond30
+                    if (Object.keys(portfolioConfig).includes('bond3_5')) {
                         idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
                         console.log('剩余资金分配给3-5年国债:', remainingFunds);
-                    } else if (prioritizedAssets.includes('bond30')) {
-                        idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
-                        console.log('剩余资金分配给30年国债ETF:', remainingFunds);
+                    } else if (Object.keys(portfolioConfig).includes('bond30')) {
+                        // 检查30年国债ETF的最小买入金额
+                        if (remainingFunds >= minBond30Amount) {
+                            idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
+                            console.log('剩余资金分配给30年国债ETF:', remainingFunds);
+                        } else {
+                            // 如果剩余资金不足最小买入金额，分配给3-5年债券
+                            if (Object.keys(portfolioConfig).includes('bond3_5')) {
+                                idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
+                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，分配给3-5年国债');
+                            } else {
+                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无3-5年债券可分配');
+                            }
+                        }
                     }
                 }
                 
