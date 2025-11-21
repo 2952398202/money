@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>全天候交易组合管理</title>
     <style>
         * {
@@ -16,6 +16,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
@@ -25,6 +27,93 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .calculate-btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            .action-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            .setting-input {
+                width: 120px;
+            }
+            
+            .setting-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .summary-item {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .setting-input {
+                width: 100%;
+            }
+            
+            /* 表格元素响应式优化 */
+            .portfolio-table th,
+            .portfolio-table td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+            
+            .amount-input {
+                font-size: 14px;
+                padding: 8px;
+            }
+            
+            .table-container {
+                border-radius: 8px;
+            }
+            
+            /* 再平衡建议区域响应式 */
+            .rebalance-suggestion {
+                padding: 15px;
+            }
+            
+            .after-operations-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .header {
@@ -49,15 +138,22 @@
             padding: 40px;
         }
 
+        /* 表格容器，用于在小屏幕上实现水平滚动 */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
         .portfolio-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            margin-bottom: 30px;
             background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 600px;
         }
 
         .portfolio-table th {
@@ -66,6 +162,7 @@
             padding: 15px;
             text-align: left;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .portfolio-table td {
@@ -324,6 +421,7 @@
 
             <button class="calculate-btn" onclick="calculatePortfolio()">计算组合配置</button>
             
+            <div class="table-container">
             <table class="portfolio-table">
                 <thead>
                     <tr>
@@ -361,7 +459,7 @@
                         <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
                     </tr>
                     <tr>
-                        <td>3-5年债券</td>
+                        <td>货币基金</td>
                         <td class="target-percentage">15%</td>
                         <td><input type="number" class="amount-input" id="bond3_5" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="bond3_5-percentage">0%</td>
@@ -386,6 +484,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
 
             <div id="rebalanceSuggestion" class="rebalance-suggestion" style="display: none;">
                 <h4>🔄 再平衡建议</h4>
@@ -492,7 +591,7 @@
             sp500: { name: '标普500 ETF', target: 15, min: 10, max: 20 },
             a500: { name: '中证A500', target: 15, min: 10, max: 20 },
             bond30: { name: '30年国债ETF', target: 40, min: 26, max: 54 },
-            bond3_5: { name: '3-5年债券', target: 15, min: 10, max: 20 },
+            bond3_5: { name: '货币基金', target: 15, min: 10, max: 20 },
             gold: { name: '黄金ETF', target: 15, min: 10, max: 20 }
         };
 
@@ -726,12 +825,12 @@
                             idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
                             console.log('剩余资金分配给30年国债ETF:', remainingFunds);
                         } else {
-                            // 如果剩余资金不足最小买入金额，分配给3-5年债券
+                            // 如果剩余资金不足最小买入金额，分配给货币基金
                             if (Object.keys(portfolioConfig).includes('bond3_5')) {
                                 idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
                                 console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，分配给3-5年国债');
                             } else {
-                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无3-5年债券可分配');
+                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无货币基金可分配');
                             }
                         }
                     }
@@ -838,13 +937,13 @@
                             <div style="margin: 8px 0;">
                                 <strong>当前配置：</strong><br>
                                 30年国债ETF: ${bond30Ratio}% (目标: ${targetBond30Ratio}%)<br>
-                                3-5年债券: ${bond3_5Ratio}% (目标: ${targetBond3_5Ratio}%)
+                                货币基金: ${bond3_5Ratio}% (目标: ${targetBond3_5Ratio}%)
                             </div>
                             <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 4px;">
                                 <strong style="color: ${statusColor};">${balanceStatus}</strong>
                             </div>
                             <small style="color: #0c5460; display: block; margin-top: 8px;">
-                                💡 长期累积策略：30年国债ETF提供久期保护和通胀对冲，3-5年债券提供流动性缓冲
+                                💡 长期累积策略：30年国债ETF提供久期保护和通胀对冲，货币基金提供流动性缓冲
                             </small>
                         </div>
                     `;
