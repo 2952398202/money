@@ -628,7 +628,8 @@
 
             let hasWarning = false;
             const rebalanceNeeds = [];
-
+            const buyNeeds = [];
+            
             // 计算每个资产的百分比和状态
             assets.forEach(asset => {
                 const percentage = (amounts[asset] / totalAmount * 100);
@@ -650,6 +651,13 @@
                         action: 'buy',
                         amount: needed
                     });
+                    buyNeeds.push({
+                        asset: asset,
+                        name: config.name,
+                        current: percentage,
+                        target: config.target,
+                        needed: needed
+                    });
                 } else if (percentage > config.max) {
                     statusElement.textContent = '偏高';
                     statusElement.className = 'status warning';
@@ -668,6 +676,132 @@
                     statusElement.className = 'status normal';
                 }
             });
+            
+            // 特殊情况处理：确保严重偏低的资产能够获得足够资金达到目标比例
+            // 包括：1) 仅使用偏高资产的超出部分不足时，从正常资产适度调整
+            //      2) 优先处理严重偏低的资产（如原油低于最小值很多）
+            
+            // 计算总卖出金额（从偏高资产）
+            const totalSellFromHigh = rebalanceNeeds.filter(n => n.action === 'sell').reduce((sum, item) => sum + item.amount, 0);
+            
+            // 计算总买入需求
+            const totalBuyNeeded = buyNeeds.reduce((sum, item) => sum + item.needed, 0);
+            
+            // 找出严重偏低的资产（低于最小值较多的）
+            const severelyUnderweight = buyNeeds.filter(item => {
+                const shortageRatio = (item.target - item.current) / (item.target - portfolioConfig[item.asset].min);
+                return shortageRatio > 0.5; // 超过50%的不足比例视为严重偏低
+            });
+            
+            console.log('严重偏低的资产:', severelyUnderweight);
+            console.log('总卖出金额（偏高资产）:', totalSellFromHigh);
+            console.log('总买入需求:', totalBuyNeeded);
+            
+            // 如果总卖出金额不足以满足买入需求，或者有严重偏低资产需要额外资金
+            if (totalSellFromHigh < totalBuyNeeded || severelyUnderweight.length > 0) {
+                console.log('启动增强型再平衡逻辑：需要从正常资产中适度调整以满足买入需求');
+                
+                // 计算需要额外卖出的金额
+                const additionalSellNeeded = Math.max(0, totalBuyNeeded - totalSellFromHigh);
+                
+                // 找出可以适度调整的正常资产（排除严重偏低的资产）
+                const adjustableAssets = [];
+                assets.forEach(asset => {
+                    // 跳过需要买入的资产
+                    if (buyNeeds.some(b => b.asset === asset)) return;
+                    
+                    // 跳过已经在卖出列表中的资产
+                    if (rebalanceNeeds.some(n => n.action === 'sell' && n.asset === asset)) return;
+                    
+                    const config = portfolioConfig[asset];
+                    const percentage = (amounts[asset] / totalAmount * 100);
+                    
+                    // 考虑正常范围内的资产，可以适度调整
+                    if (percentage >= config.min && percentage <= config.max) {
+                        // 计算可以安全卖出的金额
+                        // 1. 至少保留到最小值的金额
+                        // 2. 或者最多卖出该资产10%（比之前的5%更宽松，以满足严重偏低资产的需求）
+                        const minSafeAmount = (config.min / 100) * totalAmount;
+                        const maxSellAmount = Math.min(
+                            amounts[asset] - minSafeAmount,
+                            amounts[asset] * 0.10 // 最多卖出10%
+                        );
+                        
+                        if (maxSellAmount > 0) {
+                            adjustableAssets.push({
+                                asset: asset,
+                                name: config.name,
+                                percentage: percentage,
+                                config: config,
+                                maxSellAmount: maxSellAmount,
+                                currentAmount: amounts[asset]
+                            });
+                        }
+                    }
+                });
+                
+                // 定义资产类型优先级：债券、黄金、原油优先于股票
+                const assetTypePriority = {
+                    'bond3_5': 1,  // 债券
+                    'bond30': 2,   // 债券
+                    'oil': 3,      // 原油
+                    'gold': 4,     // 黄金
+                    'a500': 5,      // 股票
+                    'sp500': 6,    // 股票
+
+                };
+                
+                // 按照超出目标比例程度从高到低排序，当超出比例相同时，债券、黄金、原油优先于股票
+                adjustableAssets.sort((a, b) => {
+                    const aExcessRatio = a.percentage - a.config.target;
+                    const bExcessRatio = b.percentage - b.config.target;
+                    
+                    // 首先按超出比例排序
+                    if (bExcessRatio !== aExcessRatio) {
+                        return bExcessRatio - aExcessRatio;
+                    }
+                    
+                    // 超出比例相同时，按资产类型优先级排序
+                    return assetTypePriority[a.asset] - assetTypePriority[b.asset];
+                });
+                console.log('可调整的正常资产（按超出目标比例从高到低排序）:', adjustableAssets);
+                
+                // 从这些资产中分配额外需要的卖出金额
+                let additionalSellAllocated = 0;
+                adjustableAssets.forEach(assetInfo => {
+                    if (additionalSellAllocated >= additionalSellNeeded && severelyUnderweight.length === 0) return;
+                    
+                    // 计算可以卖出的金额
+                    let sellAmount = Math.min(
+                        assetInfo.maxSellAmount,
+                        additionalSellNeeded - additionalSellAllocated
+                    );
+                    
+                    // 对于严重偏低的情况，可以稍微多卖出一些以确保满足需求
+                    if (severelyUnderweight.length > 0 && sellAmount > 0) {
+                        // 可以适度增加卖出比例
+                        sellAmount = Math.min(
+                            sellAmount * 1.5, // 最多增加50%
+                            assetInfo.maxSellAmount
+                        );
+                    }
+                    
+                    if (sellAmount > 0) {
+                        console.log(`从正常资产${assetInfo.name}适度卖出: ¥${sellAmount}`);
+                        rebalanceNeeds.push({
+                            asset: assetInfo.asset,
+                            name: assetInfo.name,
+                            current: assetInfo.percentage,
+                            target: assetInfo.config.target,
+                            action: 'sell',
+                            amount: sellAmount
+                        });
+                        additionalSellAllocated += sellAmount;
+                    }
+                });
+                
+                console.log('额外卖出金额已分配:', additionalSellAllocated);
+            }
 
             // 更新整体状态
             document.getElementById('overallStatus').textContent = hasWarning ? '需要再平衡' : '配置正常';
@@ -745,13 +879,38 @@
                 console.log('总卖出金额:', totalSellAmount);
                 console.log('当前配置:', currentAmounts);
                 
-                // 按优先级分配资金：股票类(15%) → 黄金(15%) → 债券类
+                // 优先处理严重偏低的资产，然后再考虑其他优先级
+                // 找出严重偏低的资产（低于最小值很多的）
+                const currentAmountsForAnalysis = {};
+                const assets = ['sp500', 'a500', 'bond30', 'bond3_5', 'gold', 'oil'];
+                assets.forEach(asset => {
+                    currentAmountsForAnalysis[asset] = parseFloat(document.getElementById(asset).value) || 0;
+                });
+                
+                const severelyUnderweightAssets = [];
+                buyAssets.forEach(asset => {
+                    const config = portfolioConfig[asset.asset];
+                    const currentAmount = currentAmountsForAnalysis[asset.asset];
+                    const currentPercentage = (currentAmount / totalAmount) * 100;
+                    const shortageRatio = (config.target - currentPercentage) / (config.target - config.min);
+                    
+                    if (shortageRatio > 0.5) { // 超过50%的不足比例视为严重偏低
+                        severelyUnderweightAssets.push(asset.asset);
+                    }
+                });
+                
+                console.log('严重偏低的资产:', severelyUnderweightAssets);
+                
+                // 定义资产优先级，严重偏低的资产优先级最高
+                const priorityOrder = [
+                    ...severelyUnderweightAssets, // 严重偏低的资产优先
+                    'sp500', 'a500', 'gold', 'bond30', 'bond3_5', 'oil' // 常规优先级
+                ].filter((value, index, self) => self.indexOf(value) === index); // 去重
+                
                 const receivingAssets = Object.keys(portfolioConfig).filter(assetKey => 
                     !sellAssets.some(sell => sell.asset === assetKey)
                 );
                 
-                // 定义优先级顺序：股票类 → 黄金 → 债券类 → 原油
-                const priorityOrder = ['sp500', 'a500', 'gold', 'bond30', 'bond3_5', 'oil'];
                 const prioritizedAssets = receivingAssets.filter(asset => 
                     priorityOrder.includes(asset)
                 ).sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b));
@@ -768,18 +927,32 @@
                     // 计算该资产需要的资金量
                     let neededAmount = targetAmount - currentAmount;
                     
+                    // 对于严重偏低的资产，确保优先满足其需求
+                    const isSeverelyUnderweight = severelyUnderweightAssets.includes(assetKey);
+                    
                     // 特殊处理：30年国债ETF的最小买入金额检查
                     if (assetKey === 'bond30' && neededAmount > 0) {
-                        if (neededAmount < minBond30Amount) {
+                        // 对于严重偏低的资产，可以适当放宽最小买入金额要求
+                        if (neededAmount < minBond30Amount && !isSeverelyUnderweight) {
                             console.log(`${assetKey}需要金额${neededAmount}小于最小买入金额${minBond30Amount}，跳过分配`);
                             neededAmount = 0;
+                        } else if (isSeverelyUnderweight) {
+                            console.log(`${assetKey}严重偏低，即使需要金额${neededAmount}小于最小买入金额${minBond30Amount}也尝试分配`);
+                            // 保持neededAmount不变，尝试分配
                         }
                     }
                     
                     // 按优先级分配：优先满足高优先级资产的目标比例
+                    // 对于严重偏低的资产，尽可能满足其完整需求
                     let allocation = 0;
                     if (neededAmount > 0) {
-                        allocation = Math.min(neededAmount, remainingFunds);
+                        if (isSeverelyUnderweight) {
+                            // 严重偏低资产优先获得全部需要的资金
+                            allocation = Math.min(neededAmount, remainingFunds);
+                            console.log(`严重偏低资产${assetKey}优先分配:`, allocation);
+                        } else {
+                            allocation = Math.min(neededAmount, remainingFunds);
+                        }
                     }
                     
                     // 智能债券比例检查（仅对30年国债ETF）
@@ -821,27 +994,87 @@
                     }
                 });
                 
-                // 将剩余资金全部分配给最后的债券资产
+                // 将剩余资金分配给需要的资产，优先考虑非债券类和偏低资产
                 if (remainingFunds > 0.01) {
-                    // 修改逻辑：即使bond3_5在卖出列表中，剩余资金也应该分配给债券类资产
-                    // 优先分配给bond3_5，如果无法分配则分配给bond30
-                    if (Object.keys(portfolioConfig).includes('bond3_5')) {
-                        idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
-                        console.log('剩余资金分配给3-5年国债:', remainingFunds);
-                    } else if (Object.keys(portfolioConfig).includes('bond30')) {
+                    console.log('开始处理剩余资金:', remainingFunds);
+                    
+                    // 优先检查是否有真正需要买入的资产（如原油等）还未满足需求
+                    const stillNeedsBuying = buyAssets.filter(item => {
+                        const allocated = idealAllocations[item.asset] || 0;
+                        return allocated < item.amount; // 还未满足买入需求
+                    });
+                    
+                    console.log('仍需买入的资产:', stillNeedsBuying);
+                    
+                    // 如果有资产仍需买入，优先分配给这些资产
+                    if (stillNeedsBuying.length > 0) {
+                        stillNeedsBuying.forEach(need => {
+                            if (remainingFunds <= 0.01) return;
+                            
+                            const additionalAllocation = Math.min(need.amount - (idealAllocations[need.asset] || 0), remainingFunds);
+                            idealAllocations[need.asset] = (idealAllocations[need.asset] || 0) + additionalAllocation;
+                            remainingFunds -= additionalAllocation;
+                            console.log(`将额外${additionalAllocation}分配给仍需买入的${need.asset}`);
+                        });
+                    }
+                    
+                    // 检查3-5年短债的当前比例，避免过度分配
+                    if (remainingFunds > 0.01 && Object.keys(portfolioConfig).includes('bond3_5')) {
+                        const bond3_5Config = portfolioConfig.bond3_5;
+                        const currentBond3_5Amount = currentAmounts.bond3_5 + (idealAllocations.bond3_5 || 0);
+                        const currentBond3_5Percentage = (currentBond3_5Amount / totalAmount) * 100;
+                        
+                        console.log(`3-5年短债当前比例: ${currentBond3_5Percentage.toFixed(2)}%, 最大值: ${bond3_5Config.max}%`);
+                        
+                        // 如果3-5年短债已经接近或超过最大值，则不分配或减少分配
+                        if (currentBond3_5Percentage >= bond3_5Config.max - 0.5) {
+                            console.log('3-5年短债已接近或超过最大值，优先考虑其他资产');
+                            
+                            // 尝试分配给30年国债ETF（如果满足最小买入金额）
+                            if (Object.keys(portfolioConfig).includes('bond30') && remainingFunds >= minBond30Amount) {
+                                idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
+                                console.log('剩余资金分配给30年国债ETF:', remainingFunds);
+                                remainingFunds = 0;
+                            } else {
+                                // 检查是否有其他正常范围内的资产可以接收资金
+                                const otherAssets = ['sp500', 'a500', 'gold', 'oil'].filter(asset => {
+                                    const config = portfolioConfig[asset];
+                                    const currentAmount = currentAmounts[asset] + (idealAllocations[asset] || 0);
+                                    const currentPercentage = (currentAmount / totalAmount) * 100;
+                                    return currentPercentage < config.max - 0.5; // 仍有空间
+                                });
+                                
+                                if (otherAssets.length > 0) {
+                                    // 按优先级分配给其他资产
+                                    otherAssets.forEach(asset => {
+                                        if (remainingFunds <= 0.01) return;
+                                        idealAllocations[asset] = (idealAllocations[asset] || 0) + remainingFunds;
+                                        console.log(`剩余资金分配给${asset}（替代3-5年短债）:`, remainingFunds);
+                                        remainingFunds = 0;
+                                    });
+                                } else {
+                                    // 实在没有其他选择，才分配给3-5年短债
+                                    console.log('没有其他合适资产，剩余资金分配给3-5年短债:', remainingFunds);
+                                    idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
+                                    remainingFunds = 0;
+                                }
+                            }
+                        } else {
+                            // 3-5年短债还有空间，可以安全分配
+                            idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
+                            console.log('剩余资金安全分配给3-5年国债:', remainingFunds);
+                            remainingFunds = 0;
+                        }
+                    } else if (remainingFunds > 0.01 && Object.keys(portfolioConfig).includes('bond30')) {
                         // 检查30年国债ETF的最小买入金额
                         if (remainingFunds >= minBond30Amount) {
                             idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
                             console.log('剩余资金分配给30年国债ETF:', remainingFunds);
-                        } else {
-                            // 如果剩余资金不足最小买入金额，分配给3-5年短债
-                            if (Object.keys(portfolioConfig).includes('bond3_5')) {
-                                idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
-                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，分配给3-5年国债');
-                            } else {
-                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无3-5年短债可分配');
-                            }
                         }
+                    }
+                    
+                    if (remainingFunds > 0.01) {
+                        console.log('最终仍有剩余资金:', remainingFunds);
                     }
                 }
                 
