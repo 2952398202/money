@@ -459,7 +459,7 @@
                         <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
                     </tr>
                     <tr>
-                        <td>货币基金</td>
+                        <td>3-5年短债</td>
                         <td class="target-percentage">15%</td>
                         <td><input type="number" class="amount-input" id="bond3_5" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="bond3_5-percentage">0%</td>
@@ -468,11 +468,19 @@
                     </tr>
                     <tr>
                         <td>黄金ETF</td>
-                        <td class="target-percentage">15%</td>
+                        <td class="target-percentage">10%</td>
                         <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="gold-percentage">0%</td>
                         <td class="status normal" id="gold-status">正常</td>
                         <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
+                    </tr>
+                    <tr>
+                        <td>南方原油</td>
+                        <td class="target-percentage">5%</td>
+                        <td><input type="number" class="amount-input" id="oil" placeholder="输入金额" min="0" step="100"></td>
+                        <td class="percentage" id="oil-percentage">0%</td>
+                        <td class="status normal" id="oil-status">正常</td>
+                        <td><button class="action-btn" onclick="showRebalance('oil')">再平衡</button></td>
                     </tr>
                     <tr class="total-row">
                         <td>总计</td>
@@ -588,15 +596,16 @@
         }
 
         const portfolioConfig = {
-            sp500: { name: '标普500 ETF', target: 15, min: 10, max: 20 },
-            a500: { name: '中证A500', target: 15, min: 10, max: 20 },
-            bond30: { name: '30年国债ETF', target: 40, min: 26, max: 54 },
-            bond3_5: { name: '货币基金', target: 15, min: 10, max: 20 },
-            gold: { name: '黄金ETF', target: 15, min: 10, max: 20 }
+            sp500: { name: '标普500 ETF', target: 15, min: 12, max: 18 },
+            a500: { name: '中证A500', target: 15, min: 12, max: 18 },
+            bond30: { name: '30年国债ETF', target: 40, min: 36, max: 44 },
+            bond3_5: { name: '3-5年债券', target: 15, min: 13, max: 17 },
+            gold: { name: '黄金ETF', target: 10, min: 8, max: 12 },
+            oil: { name: '南方原油', target: 5, min: 4, max: 6 }
         };
 
         function calculatePortfolio() {
-            const assets = ['sp500', 'a500', 'bond30', 'bond3_5', 'gold'];
+            const assets = ['sp500', 'a500', 'bond30', 'bond3_5', 'gold', 'oil'];
             let totalAmount = 0;
             const amounts = {};
             
@@ -723,7 +732,7 @@
                 
                 // 获取当前金额并计算买入分配
                 const currentAmounts = {};
-                ['sp500', 'a500', 'bond30', 'bond3_5', 'gold'].forEach(asset => {
+                ['sp500', 'a500', 'bond30', 'bond3_5', 'gold', 'oil'].forEach(asset => {
                     currentAmounts[asset] = parseFloat(document.getElementById(asset).value) || 0;
                 });
                 
@@ -741,8 +750,8 @@
                     !sellAssets.some(sell => sell.asset === assetKey)
                 );
                 
-                // 定义优先级顺序：股票类 → 黄金 → 债券类
-                const priorityOrder = ['sp500', 'a500', 'gold', 'bond30', 'bond3_5'];
+                // 定义优先级顺序：股票类 → 黄金 → 债券类 → 原油
+                const priorityOrder = ['sp500', 'a500', 'gold', 'bond30', 'bond3_5', 'oil'];
                 const prioritizedAssets = receivingAssets.filter(asset => 
                     priorityOrder.includes(asset)
                 ).sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b));
@@ -825,12 +834,12 @@
                             idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
                             console.log('剩余资金分配给30年国债ETF:', remainingFunds);
                         } else {
-                            // 如果剩余资金不足最小买入金额，分配给货币基金
+                            // 如果剩余资金不足最小买入金额，分配给3-5年短债
                             if (Object.keys(portfolioConfig).includes('bond3_5')) {
                                 idealAllocations.bond3_5 = (idealAllocations.bond3_5 || 0) + remainingFunds;
                                 console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，分配给3-5年国债');
                             } else {
-                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无货币基金可分配');
+                                console.log('剩余资金', remainingFunds, '小于30年国债ETF最小买入金额', minBond30Amount, '，且无3-5年短债可分配');
                             }
                         }
                     }
@@ -937,13 +946,13 @@
                             <div style="margin: 8px 0;">
                                 <strong>当前配置：</strong><br>
                                 30年国债ETF: ${bond30Ratio}% (目标: ${targetBond30Ratio}%)<br>
-                                货币基金: ${bond3_5Ratio}% (目标: ${targetBond3_5Ratio}%)
+                                3-5年短债: ${bond3_5Ratio}% (目标: ${targetBond3_5Ratio}%)
                             </div>
                             <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 4px;">
                                 <strong style="color: ${statusColor};">${balanceStatus}</strong>
                             </div>
                             <small style="color: #0c5460; display: block; margin-top: 8px;">
-                                💡 长期累积策略：30年国债ETF提供久期保护和通胀对冲，货币基金提供流动性缓冲
+                                💡 长期累积策略：30年国债ETF提供久期保护和通胀对冲，3-5年短债提供流动性缓冲
                             </small>
                         </div>
                     `;
