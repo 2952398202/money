@@ -421,6 +421,26 @@
 
             <button class="calculate-btn" onclick="calculatePortfolio()">计算组合配置</button>
             
+            <!-- 加仓金额分配功能 -->
+            <div style="margin: 30px 0; padding: 20px; background: #e3f2fd; border-radius: 10px; border: 1px solid #bbdefb;">
+                <h3 style="color: #1976d2; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    📈 加仓金额分配
+                </h3>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="additionalAmount" style="font-weight: 500; color: #495057;">加仓金额：</label>
+                        <input type="number" id="additionalAmount" placeholder="输入加仓金额" min="0" step="100" 
+                               style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        <span style="color: #6c757d;">元</span>
+                    </div>
+                    <button onclick="calculateAdditionalAllocation()" 
+                            style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
+                        计算加仓分配
+                    </button>
+                </div>
+                <div id="additionalAllocationResult" style="margin-top: 20px; display: none;"></div>
+            </div>
+            
             <div class="table-container">
             <table class="portfolio-table">
                 <thead>
@@ -676,6 +696,92 @@
                     statusElement.className = 'status normal';
                 }
             });
+            
+            // 特殊逻辑：检查3-5年债券是否过多，考虑卖出一部分加到30年债券
+            // 即使3-5年债券在正常范围内，如果超过目标比例较多，也考虑优化债券内部结构
+            const bond3_5Percentage = (amounts.bond3_5 / totalAmount * 100);
+            const bond3_5Config = portfolioConfig.bond3_5;
+            const bond30Percentage = (amounts.bond30 / totalAmount * 100);
+            const bond30Config = portfolioConfig.bond30;
+            
+            // 获取30年债券的最小买入金额设置
+            const bond30MinBuyAmount = parseFloat(document.getElementById('bond30-min-buy').value) || 10000;
+            
+            // 如果3-5年债券超过目标比例2%以上，且30年债券低于目标比例或有空间
+            if (bond3_5Percentage > bond3_5Config.target + 2 && bond30Percentage < bond30Config.max) {
+                // 计算可以从3-5年债券中转移的金额
+                // 1. 最多转移到3-5年债券回到目标比例的金额
+                // 2. 确保转移后30年债券不超过最大值
+                const maxTransferFromBond3_5 = amounts.bond3_5 - (bond3_5Config.target / 100 * totalAmount);
+                const maxTransferToBond30 = (bond30Config.max / 100 * totalAmount) - amounts.bond30;
+                const potentialTransferAmount = Math.min(maxTransferFromBond3_5, maxTransferToBond30);
+                
+                // 确保转移金额满足30年债券的最小买入金额要求，避免频繁的小额转移
+                // 只有当潜在转移金额大于等于30年债券的最小买入金额时才进行操作
+                if (potentialTransferAmount >= bond30MinBuyAmount) {
+                    const actualTransferAmount = potentialTransferAmount;
+                    
+                    console.log('债券内部结构优化：3-5年债券过多，考虑转移资金到30年债券');
+                    console.log(`3-5年债券当前比例: ${bond3_5Percentage.toFixed(2)}%, 目标: ${bond3_5Config.target}%`);
+                    console.log(`30年债券当前比例: ${bond30Percentage.toFixed(2)}%, 目标: ${bond30Config.target}%`);
+                    console.log(`30年债券最小买入金额: ${bond30MinBuyAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}元`);
+                    console.log(`计划转移金额: ${actualTransferAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}元`);
+                    
+                    // 检查3-5年债券是否已经在卖出列表中
+                    const existingBond3_5Sell = rebalanceNeeds.find(n => n.action === 'sell' && n.asset === 'bond3_5');
+                    if (existingBond3_5Sell) {
+                        // 如果已经在卖出列表中，增加卖出金额
+                        existingBond3_5Sell.amount += actualTransferAmount;
+                    } else {
+                        // 否则，添加到卖出列表
+                        rebalanceNeeds.push({
+                            asset: 'bond3_5',
+                            name: bond3_5Config.name,
+                            current: bond3_5Percentage,
+                            target: bond3_5Config.target,
+                            action: 'sell',
+                            amount: actualTransferAmount
+                        });
+                    }
+                    
+                    // 检查30年债券是否已经在买入列表中
+                    const existingBond30Buy = rebalanceNeeds.find(n => n.action === 'buy' && n.asset === 'bond30');
+                    if (existingBond30Buy) {
+                        // 如果已经在买入列表中，增加买入金额
+                        existingBond30Buy.amount += actualTransferAmount;
+                    } else {
+                        // 否则，添加到买入列表
+                        rebalanceNeeds.push({
+                            asset: 'bond30',
+                            name: bond30Config.name,
+                            current: bond30Percentage,
+                            target: bond30Config.target,
+                            action: 'buy',
+                            amount: actualTransferAmount
+                        });
+                        
+                        // 同时添加到buyNeeds列表
+                        buyNeeds.push({
+                            asset: 'bond30',
+                            name: bond30Config.name,
+                            current: bond30Percentage,
+                            target: bond30Config.target,
+                            needed: actualTransferAmount
+                        });
+                    }
+                    
+                    // 更新整体状态
+                    hasWarning = true;
+                } else {
+                    // 当潜在转移金额小于最小买入金额时，输出提示信息
+                    console.log('债券内部结构优化：3-5年债券略多，但转移金额未达到30年债券最小买入金额');
+                    console.log(`3-5年债券当前比例: ${bond3_5Percentage.toFixed(2)}%, 目标: ${bond3_5Config.target}%`);
+                    console.log(`30年债券当前比例: ${bond30Percentage.toFixed(2)}%, 目标: ${bond30Config.target}%`);
+                    console.log(`潜在转移金额: ${potentialTransferAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}元`);
+                    console.log(`30年债券最小买入金额: ${bond30MinBuyAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}元`);
+                    console.log('建议：继续积累差异，待达到最小买入金额时再进行转移');
+                }
+            }
             
             // 特殊情况处理：确保严重偏低的资产能够获得足够资金达到目标比例
             // 包括：1) 仅使用偏高资产的超出部分不足时，从正常资产适度调整
@@ -1198,6 +1304,130 @@
             suggestionDiv.style.display = 'block';
         }
 
+        function calculateAdditionalAllocation() {
+            const additionalAmount = parseFloat(document.getElementById('additionalAmount').value);
+            
+            if (isNaN(additionalAmount) || additionalAmount <= 0) {
+                alert('请输入有效的加仓金额');
+                return;
+            }
+            
+            // 获取当前各资产的金额
+            const currentAmounts = {};
+            let totalCurrentAmount = 0;
+            
+            Object.keys(portfolioConfig).forEach(asset => {
+                const amount = parseFloat(document.getElementById(asset).value) || 0;
+                currentAmounts[asset] = amount;
+                totalCurrentAmount += amount;
+            });
+            
+            if (totalCurrentAmount === 0) {
+                alert('请先输入当前投资金额并点击"计算组合配置"');
+                return;
+            }
+            
+            // 计算加上加仓金额后的总金额
+            const newTotalAmount = totalCurrentAmount + additionalAmount;
+            
+            // 计算各资产的目标金额
+            const targetAmounts = {};
+            const allocationAmounts = {};
+            
+            Object.keys(portfolioConfig).forEach(asset => {
+                const targetPercentage = portfolioConfig[asset].target / 100;
+                targetAmounts[asset] = targetPercentage * newTotalAmount;
+                allocationAmounts[asset] = Math.max(0, targetAmounts[asset] - currentAmounts[asset]);
+            });
+            
+            // 处理30年国债ETF的最小买入金额限制
+            const minBond30Amount = parseFloat(document.getElementById('minBond30Amount').value) || 10000;
+            
+            if (allocationAmounts.bond30 > 0 && allocationAmounts.bond30 < minBond30Amount) {
+                // 如果分配给30年国债ETF的金额小于最小买入金额，将其重新分配给3-5年短债
+                const insufficientAmount = allocationAmounts.bond30;
+                allocationAmounts.bond30 = 0;
+                allocationAmounts.bond3_5 += insufficientAmount;
+            }
+            
+            // 计算实际分配总额（可能有舍入误差）
+            let totalAllocated = Object.values(allocationAmounts).reduce((sum, amount) => sum + amount, 0);
+            let roundingError = additionalAmount - totalAllocated;
+            
+            // 处理舍入误差，添加到3-5年短债
+            if (Math.abs(roundingError) > 0.01) {
+                allocationAmounts.bond3_5 += roundingError;
+            }
+            
+            // 生成分配结果HTML
+            let html = `
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h4 style="color: #28a745; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        💰 加仓分配建议
+                    </h4>
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: 500; color: #495057;">加仓金额：</span>
+                            <span style="font-weight: bold; color: #28a745;">¥${additionalAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: 500; color: #495057;">当前总金额：</span>
+                            <span style="font-weight: bold; color: #495057;">¥${totalCurrentAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 500; color: #495057;">加仓后总金额：</span>
+                            <span style="font-weight: bold; color: #1976d2;">¥${newTotalAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                    
+                    <h5 style="color: #343a40; margin-bottom: 10px; font-size: 16px;">建议加仓明细：</h5>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            `;
+            
+            Object.entries(allocationAmounts).forEach(([asset, amount]) => {
+                if (amount > 0) {
+                    const config = portfolioConfig[asset];
+                    const percentage = ((amount / additionalAmount) * 100).toFixed(2);
+                    const statusColor = amount > 0 ? '#28a745' : '#dc3545';
+                    
+                    html += `
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${statusColor};">
+                            <div style="font-weight: bold; color: #495057; margin-bottom: 5px;">${config.name}</div>
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 5px;">
+                                目标比例：${config.target}%
+                            </div>
+                            <div style="color: ${statusColor}; font-weight: bold; font-size: 1.1em;">
+                                加仓金额：¥${amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}
+                            </div>
+                            <div style="color: #666; font-size: 0.9em;">
+                                占加仓比例：${percentage}%
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += `
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #c8e6c9; font-size: 14px; color: #6c757d;">
+                        <p style="margin-bottom: 10px;">
+                            💡 <strong>提示：</strong> 30年国债ETF最小买入金额为 ¥${minBond30Amount.toLocaleString('zh-CN')}，
+                            不足此金额的部分已自动分配给3-5年短债。
+                        </p>
+                        <p>
+                            🎯 加仓后，您的投资组合将更接近目标配置比例，有助于优化长期投资收益。
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // 显示结果
+            const resultDiv = document.getElementById('additionalAllocationResult');
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }
+        
         function showRebalance(asset) {
             const config = portfolioConfig[asset];
             const currentAmount = parseFloat(document.getElementById(asset).value) || 0;
