@@ -1626,16 +1626,25 @@
                 // 如果分配给30年国债ETF的金额小于最小买入金额，将其重新分配给货币基金
                 const insufficientAmount = allocationAmounts.bond30;
                 allocationAmounts.bond30 = 0;
-                allocationAmounts.bond3_5 += insufficientAmount;
+                allocationAmounts.moneyFund += insufficientAmount;
             }
             
-            // 计算实际分配总额（可能有舍入误差）
+            // 计算实际分配总额
             let totalAllocated = Object.values(allocationAmounts).reduce((sum, amount) => sum + amount, 0);
+            let remainingFunds = additionalAmount - totalAllocated;
+            
+            // 确保所有剩余资金都被分配给货币基金
+            if (remainingFunds > 0.01) {
+                allocationAmounts.moneyFund += remainingFunds;
+            }
+            
+            // 再次计算总分配金额以确保准确性
+            totalAllocated = Object.values(allocationAmounts).reduce((sum, amount) => sum + amount, 0);
             let roundingError = additionalAmount - totalAllocated;
             
             // 处理舍入误差，添加到货币基金
             if (Math.abs(roundingError) > 0.01) {
-                allocationAmounts.bond3_5 += roundingError;
+                allocationAmounts.moneyFund += roundingError;
             }
             
             // 生成分配结果HTML
