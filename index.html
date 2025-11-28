@@ -870,9 +870,20 @@
         // 从localStorage加载设置，如果没有则使用默认值
         let minBond30Amount = localStorage.getItem('minBond30Amount') ? parseInt(localStorage.getItem('minBond30Amount')) : 10000;
         
-        // 页面加载时设置输入框的值
+        // 页面加载时设置输入框的值和更新目标比例
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('minBond30Amount').value = minBond30Amount;
+            
+            // 动态更新表格中的目标比例
+            Object.keys(portfolioConfig).forEach(assetKey => {
+                const row = document.getElementById(assetKey).closest('tr');
+                if (row) {
+                    const targetCell = row.querySelector('.target-percentage');
+                    if (targetCell) {
+                        targetCell.textContent = `${portfolioConfig[assetKey].target}%`;
+                    }
+                }
+            });
         });
 
         // 保存设置功能
@@ -961,11 +972,11 @@
         }
 
         const portfolioConfig = {
-            sp500: { name: '标普500 ETF', target: 15, min: 10, max: 20 },
-            a500: { name: '中证A500', target: 15, min: 10, max: 20 },
-            bond30: { name: '30年国债ETF', target: 40, min: 35, max: 45 },
-            moneyFund: { name: '货币基金', target: 15, min: 11, max: 19 },
-            gold: { name: '黄金ETF', target: 15, min: 12, max: 18 }
+            sp500: { name: '标普500 ETF', target: 20, min: 13, max: 27 },
+            a500: { name: '中证A500', target: 20, min: 12, max: 28 },
+            bond30: { name: '30年国债ETF', target: 35, min: 29, max: 41 },
+            moneyFund: { name: '货币基金', target: 10, min: 7, max: 13 },
+            gold: { name: '黄金ETF', target: 15, min: 10, max: 20 }
         };
 
         function calculatePortfolio() {
