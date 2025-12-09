@@ -812,6 +812,14 @@
                         <td class="status normal" id="bond30-status">正常</td>
                         <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
                     </tr>
+                                        <tr>
+                                            <td>黄金ETF</td>
+                                            <td class="target-percentage">15%</td>
+                                            <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0" step="100"></td>
+                                            <td class="percentage" id="gold-percentage">0%</td>
+                                            <td class="status normal" id="gold-status">正常</td>
+                                            <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
+                                        </tr>
                     <tr>
                         <td>货币基金ETF</td>
                         <td class="target-percentage">10%</td>
@@ -820,14 +828,7 @@
                         <td class="status normal" id="moneyFund-status">正常</td>
                         <td><button class="action-btn" onclick="showRebalance('moneyFund')">再平衡</button></td>
                     </tr>
-                    <tr>
-                        <td>黄金ETF</td>
-                        <td class="target-percentage">15%</td>
-                        <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="gold-percentage">0%</td>
-                        <td class="status normal" id="gold-status">正常</td>
-                        <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
-                    </tr>
+
                     <tr class="total-row">
                         <td>总计</td>
                         <td>100%</td>
