@@ -732,30 +732,18 @@
         </div>
         
         <div class="content">
-            <div class="settings-panel">
-                <h3>⚙️ 组合设置</h3>
-                <div class="setting-item">
-                    <span class="setting-label">30年国债ETF最小买入金额</span>
-                    <div style="display: flex; align-items: center;">
-                        <input type="number" class="setting-input" id="minBond30Amount" value="10000" min="0" step="1000">
-                        <span class="setting-unit">元</span>
-                        <button class="save-settings-btn" onclick="saveSettings()" style="margin-left: 15px;">保存设置</button>
-                    </div>
-                    
-                    <!-- 操作后配置预览 -->
-                    <div class="after-operations" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
-                        <h4 style="margin: 0 0 15px 0; color: #28a745; font-size: 14px;">
-                            📊 操作后配置预览
-                        </h4>
-                        <div class="after-operations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                            <!-- 这里将通过JavaScript动态生成 -->
-                        </div>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span>💡 操作后总资产: <strong id="after-total-amount" style="color: #28a745;">¥0</strong></span>
-                                <span>📈 与目标偏差: <strong id="target-deviation" style="color: #17a2b8;">计算中...</strong></span>
-                            </div>
-                        </div>
+            <!-- 操作后配置预览 -->
+            <div class="after-operations" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+                <h4 style="margin: 0 0 15px 0; color: #28a745; font-size: 14px;">
+                    📊 操作后配置预览
+                </h4>
+                <div class="after-operations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <!-- 这里将通过JavaScript动态生成 -->
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>💡 操作后总资产: <strong id="after-total-amount" style="color: #28a745;">¥0</strong></span>
+                        <span>📈 与目标偏差: <strong id="target-deviation" style="color: #17a2b8;">计算中...</strong></span>
                     </div>
                 </div>
             </div>
@@ -809,31 +797,24 @@
                 <tbody id="portfolioBody">
                     <tr>
                         <td>标普500 ETF</td>
-                        <td class="target-percentage">15%</td>
+                        <td class="target-percentage">40%</td>
                         <td><input type="number" class="amount-input" id="sp500" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="sp500-percentage">0%</td>
                         <td class="status normal" id="sp500-status">正常</td>
                         <td><button class="action-btn" onclick="showRebalance('sp500')">再平衡</button></td>
                     </tr>
-                    <tr>
-                        <td>中证A500</td>
-                        <td class="target-percentage">15%</td>
-                        <td><input type="number" class="amount-input" id="a500" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="a500-percentage">0%</td>
-                        <td class="status normal" id="a500-status">正常</td>
-                        <td><button class="action-btn" onclick="showRebalance('a500')">再平衡</button></td>
-                    </tr>
+
                     <tr>
                         <td>30年国债ETF</td>
-                        <td class="target-percentage">40%</td>
+                        <td class="target-percentage">35%</td>
                         <td><input type="number" class="amount-input" id="bond30" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="bond30-percentage">0%</td>
                         <td class="status normal" id="bond30-status">正常</td>
                         <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
                     </tr>
                     <tr>
-                        <td>货币基金</td>
-                        <td class="target-percentage">15%</td>
+                        <td>货币基金ETF</td>
+                        <td class="target-percentage">10%</td>
                         <td><input type="number" class="amount-input" id="moneyFund" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="moneyFund-percentage">0%</td>
                         <td class="status normal" id="moneyFund-status">正常</td>
@@ -867,13 +848,8 @@
     </div>
 
     <script>
-        // 从localStorage加载设置，如果没有则使用默认值
-        let minBond30Amount = localStorage.getItem('minBond30Amount') !== null ? parseInt(localStorage.getItem('minBond30Amount')) : 10000;
-        
-        // 页面加载时设置输入框的值和更新目标比例
+        // 页面加载时更新目标比例
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('minBond30Amount').value = minBond30Amount;
-            
             // 动态更新表格中的目标比例
             Object.keys(portfolioConfig).forEach(assetKey => {
                 const row = document.getElementById(assetKey).closest('tr');
@@ -951,36 +927,17 @@
             targetDeviation.innerHTML = `<span style="color: ${deviationColor};">${avgDeviation}% (${deviationText})</span>`;
         }
 
-        // 保存设置功能
-        function saveSettings() {
-            const newMinAmount = parseInt(document.getElementById('minBond30Amount').value);
-            if (isNaN(newMinAmount) || newMinAmount < 0) {
-                alert('请输入有效的金额（大于等于0）');
-                return;
-            }
-            
-            minBond30Amount = newMinAmount;
-            localStorage.setItem('minBond30Amount', newMinAmount);
-            
-            // 如果当前有数据，重新计算以应用新设置
-            const totalAmount = parseFloat(document.getElementById('totalAmount').textContent.replace('¥', '').replace(/,/g, '')) || 0;
-            if (totalAmount > 0) {
-                calculatePortfolio();
-            }
-            
-            alert(`设置已保存！30年国债ETF最小买入金额已更新为 ¥${newMinAmount.toLocaleString('zh-CN')}`);
-        }
+
 
         const portfolioConfig = {
-            sp500: { name: '标普500 ETF', target: 20, min: 13, max: 27 },
-            a500: { name: '中证A500', target: 20, min: 12, max: 28 },
-            bond30: { name: '30年国债ETF', target: 35, min: 29, max: 41 },
-            moneyFund: { name: '货币基金', target: 10, min: 7, max: 13 },
-            gold: { name: '黄金ETF', target: 15, min: 10, max: 20 }
+            sp500: { name: '标普500 ETF', target: 40, min: 32, max: 48 },
+            bond30: { name: '30年国债ETF', target: 35, min: 28, max: 42 },
+            moneyFund: { name: '货币基金ETF', target: 10, min: 5, max: 15 },
+            gold: { name: '黄金ETF', target: 15, min: 9, max: 21 }
         };
 
         function calculatePortfolio() {
-            const assets = ['sp500', 'a500', 'bond30', 'moneyFund', 'gold'];
+            const assets = ['sp500', 'bond30', 'moneyFund', 'gold'];
             let totalAmount = 0;
             const amounts = {};
             
@@ -1011,6 +968,16 @@
                 const percentage = (amounts[asset] / totalAmount * 100);
                 document.getElementById(`${asset}-percentage`).textContent = `${percentage.toFixed(2)}%`;
                 
+                // 调试代码：检查百分比计算
+                console.log(`DEBUG - ${asset}金额=${amounts[asset]}，总金额=${totalAmount}，计算百分比=${percentage}%`);
+                
+                // 检查标普500 ETF的情况
+                if (asset === 'sp500') {
+                    const config = portfolioConfig[asset];
+                    console.log(`DEBUG - 标普500 ETF：min=${config.min}%，target=${config.target}%，max=${config.max}%`);
+                    console.log(`DEBUG - 标普500 ETF：percentage > config.max = ${percentage > config.max}`);
+                }
+                
                 const config = portfolioConfig[asset];
                 const statusElement = document.getElementById(`${asset}-status`);
                 
@@ -1038,7 +1005,13 @@
                     statusElement.textContent = '偏高';
                     statusElement.className = 'status warning';
                     hasWarning = true;
-                    const excess = amounts[asset] - (config.target / 100 * totalAmount);
+                    const targetAmount = (config.target / 100 * totalAmount);
+                    const excess = amounts[asset] - targetAmount;
+                    
+                    // 调试代码：检查超出金额计算
+                    console.log(`DEBUG - ${asset}偏高：当前金额=${amounts[asset]}，目标金额=${targetAmount}，超出金额=${excess}`);
+                    console.log(`DEBUG - ${asset}当前比例=${percentage}%，目标比例=${config.target}%，超出比例=${percentage - config.target}%`);
+                    
                     sellNeeds.push({
                         asset: asset,
                         name: config.name,
@@ -1055,13 +1028,12 @@
             });
             
             // 优化初始卖出需求的排序：优先卖出比例超出目标多的资产
-            // 定义资产类型优先级：货币基金、黄金优先于股票和债券
+            // 定义资产类型优先级：货币基金优先，然后债券，再黄金，最后股票
             const sellAssetPriority = {
                 'moneyFund': 1,  // 货币基金优先卖出
-                'gold': 2,       // 黄金次之
-                'sp500': 3,      // 股票次之
-                'a500': 4,       // 股票次之
-                'bond30': 5      // 债券最后卖出
+                'bond30': 2,     // 债券次之
+                'gold': 3,       // 黄金次之
+                'sp500': 4       // 股票最后卖出
             };
             
             sellNeeds.sort((a, b) => {
@@ -1074,10 +1046,19 @@
                 return sellAssetPriority[a.asset] - sellAssetPriority[b.asset];
             });
             
+            // 调试代码：检查卖出需求排序后的结果
+            console.log('DEBUG - 排序后的卖出需求:', sellNeeds);
+            console.log('DEBUG - 卖出需求数量:', sellNeeds.length);
+            
             // 将排序后的卖出需求添加到再平衡需求中
             sellNeeds.forEach(sellNeed => {
+                console.log(`DEBUG - 添加卖出需求：${sellNeed.asset}，金额：${sellNeed.amount}`);
                 rebalanceNeeds.push(sellNeed);
             });
+            
+            // 调试代码：检查再平衡需求数组
+            console.log('DEBUG - 添加卖出需求后的再平衡需求数组:', rebalanceNeeds);
+            console.log('DEBUG - 再平衡需求数量:', rebalanceNeeds.length);
             
 
             
@@ -1148,10 +1129,8 @@
                 const assetTypePriority = {
                     'moneyFund': 1,  // 货币基金优先卖出
                     'gold': 2,     // 黄金次之
-                    'a500': 3,      // 股票次之
-                    'sp500': 4,    // 股票次之
-                    'bond30': 5   // 债券最后卖出
-
+                    'sp500': 3,    // 股票次之
+                    'bond30': 4   // 债券最后卖出
                 };
                 
                 // 按照超出目标比例程度从高到低排序，当超出比例相同时，债券、黄金、原油优先于股票
@@ -1206,50 +1185,22 @@
                 console.log('额外卖出金额已分配:', additionalSellAllocated);
             }
 
-            // 特殊处理：30年国债ETF凑钱逻辑
-            // 如果30年国债ETF需要买入但金额不足最小购买要求，计算需要凑的总金额并调整卖出策略
+            // 特殊处理：30年国债ETF逻辑
+            // 计算30年国债ETF的买入需求并调整卖出策略
             const bond30Config = portfolioConfig.bond30;
             const bond30CurrentAmount = amounts.bond30;
             const bond30TargetAmount = (bond30Config.target / 100) * totalAmount;
             const bond30NeededAmount = bond30TargetAmount - bond30CurrentAmount;
             
-            // 调试：确认minBond30Amount的值
-            console.log(`DEBUG - localStorage中的minBond30Amount: ${localStorage.getItem('minBond30Amount')}`);
-            console.log(`DEBUG - 当前minBond30Amount变量值: ${minBond30Amount}`);
             console.log(`30年国债ETF：当前${bond30CurrentAmount}，目标${bond30TargetAmount}，需要${bond30NeededAmount}`);
             
-            // 如果30年国债ETF需要买入，确保买入金额不小于最小买入金额
+            // 如果30年国债ETF需要买入
             if (bond30NeededAmount > 0) {
-                // 直接从localStorage获取最新值，确保使用用户设置的金额
-                const latestMinBond30Amount = parseInt(localStorage.getItem('minBond30Amount')) || 10000;
-                console.log(`DEBUG - 最新获取的最小买入金额: ${latestMinBond30Amount}`);
-                
-                // 计算当前总卖出金额
-                const currentTotalSellAmount = rebalanceNeeds.filter(n => n.action === 'sell').reduce((sum, item) => sum + item.amount, 0);
-                console.log(`DEBUG - 当前总卖出金额: ¥${currentTotalSellAmount}`);
-                console.log(`DEBUG - bond30需要买入金额: ¥${bond30NeededAmount}`);
-                
-                let additionalAmountNeeded = 0;
-                let totalBond30Need = bond30NeededAmount;
-                
-                // 计算需要的总买入金额（至少等于最小买入金额）
-                totalBond30Need = Math.max(bond30NeededAmount, latestMinBond30Amount);
-                console.log(`DEBUG - 调整后需要买入金额: ¥${totalBond30Need}`);
-                
-                // 计算需要额外卖出的金额（需要的总买入金额减去当前总卖出金额）
-                additionalAmountNeeded = totalBond30Need - currentTotalSellAmount;
-                console.log(`DEBUG - 需要额外卖出的金额: ¥${additionalAmountNeeded}`);
-                
-                // 如果额外需要的金额小于0，说明当前总卖出金额已经足够
-                additionalAmountNeeded = Math.max(0, additionalAmountNeeded);
-                
-                console.log(`需要额外凑${additionalAmountNeeded}元才能满足30年国债ETF的最小买入金额要求，总需要${totalBond30Need}元`);
-                
                 // 更新rebalanceNeeds数组中对应的bond30买入需求项的金额
                 const bond30BuyNeedIndex = rebalanceNeeds.findIndex(item => item.asset === 'bond30' && item.action === 'buy');
                 if (bond30BuyNeedIndex !== -1) {
-                    console.log(`更新30年国债ETF买入金额：从${rebalanceNeeds[bond30BuyNeedIndex].amount}元调整为${totalBond30Need}元`);
-                    rebalanceNeeds[bond30BuyNeedIndex].amount = totalBond30Need;
+                    console.log(`更新30年国债ETF买入金额：从${rebalanceNeeds[bond30BuyNeedIndex].amount}元调整为${bond30NeededAmount}元`);
+                    rebalanceNeeds[bond30BuyNeedIndex].amount = bond30NeededAmount;
                 } else {
                     // 如果没有买入需求，添加新的买入需求
                     rebalanceNeeds.push({
@@ -1258,279 +1209,32 @@
                         current: (bond30CurrentAmount / totalAmount) * 100,
                         target: bond30Config.target,
                         action: 'buy',
-                        amount: totalBond30Need
+                        amount: bond30NeededAmount
                     });
-                    console.log(`添加30年国债ETF买入需求：${totalBond30Need}元`);
+                    console.log(`添加30年国债ETF买入需求：${bond30NeededAmount}元`);
                 }
                 
-                // 找出可以卖出额外资金的资产，按优先级排序
-                const existingSellAssets = rebalanceNeeds.filter(n => n.action === 'sell');
-                
-                // 定义资产类型优先级：货币基金、黄金优先卖出，避免影响核心债券配置
-                const assetTypePriority = {
-                    'moneyFund': 1,  // 货币基金优先卖出
-                    'gold': 2,     // 黄金次之
-                    'sp500': 3,    // 股票次之
-                    'a500': 4,      // 股票次之
-                    'bond30': 10   // 债券，尽量不卖出
-                };
-                
-                // 找出所有可以卖出的资产（包括已经在卖出列表中的和可以适度调整的）
-                const allSellableAssets = [];
-                
-                // 1. 首先添加已经在卖出列表中的资产
-                existingSellAssets.forEach(sellItem => {
-                    const config = portfolioConfig[sellItem.asset];
-                    const percentage = (amounts[sellItem.asset] / totalAmount) * 100;
-                    
-                    // 对于已经在卖出列表中的资产，允许卖出更多来凑够30年国债ETF的最小买入金额
-                    allSellableAssets.push({
-                        asset: sellItem.asset,
-                        name: sellItem.name,
-                        currentAmount: amounts[sellItem.asset],
-                        config: config,
-                        percentage: percentage,
-                        maxSellAmount: amounts[sellItem.asset] * 0.30, // 放宽限制，最多可以卖30%
-                        priority: assetTypePriority[sellItem.asset] || 5
-                    });
-                });
-                
-                // 2. 找出可以适度调整的正常资产
-                assets.forEach(asset => {
-                    // 跳过需要买入的资产
-                    if (buyNeeds.some(b => b.asset === asset)) return;
-                    
-                    // 跳过已经在卖出列表中的资产
-                    if (existingSellAssets.some(n => n.action === 'sell' && n.asset === asset)) return;
-                    
-                    const config = portfolioConfig[asset];
-                    const percentage = (amounts[asset] / totalAmount * 100);
-                    
-                    // 考虑正常范围内的资产，可以适度调整
-                    if (percentage >= config.min && percentage <= config.max) {
-                        // 计算可以安全卖出的金额
-                        const minSafeAmount = (config.min / 100) * totalAmount;
-                        const maxSellAmount = Math.min(
-                            amounts[asset] - minSafeAmount,
-                            amounts[asset] * 0.25 // 放宽限制，最多可以卖25%
-                        );
-                        
-                        if (maxSellAmount > 0) {
-                            allSellableAssets.push({
-                                asset: asset,
-                                name: config.name,
-                                currentAmount: amounts[asset],
-                                config: config,
-                                percentage: percentage,
-                                maxSellAmount: maxSellAmount,
-                                priority: assetTypePriority[asset] || 5
-                            });
-                        }
-                    }
-                    // 3. 考虑超过目标比例的资产，这些资产可以卖出更多
-                    else if (percentage > config.target) {
-                        // 对于超过目标比例的资产，可以卖出更多来凑钱
-                        const minSafeAmount = (config.min / 100) * totalAmount;
-                        const maxSellAmount = Math.min(
-                            amounts[asset] - minSafeAmount,
-                            amounts[asset] * 0.40 // 对于超配资产，可以卖出更多（最多40%）
-                        );
-                        
-                        if (maxSellAmount > 0) {
-                            allSellableAssets.push({
-                                asset: asset,
-                                name: config.name,
-                                currentAmount: amounts[asset],
-                                config: config,
-                                percentage: percentage,
-                                maxSellAmount: maxSellAmount,
-                                priority: assetTypePriority[asset] || 5
-                            });
-                        }
-                    }
-                });
-                
-                // 按优先级排序，优先级高的资产先卖出
-                allSellableAssets.sort((a, b) => {
-                    if (a.priority !== b.priority) {
-                        return a.priority - b.priority;
-                    }
-                    // 优先级相同的情况下，按当前金额从大到小排序
-                    return b.currentAmount - a.currentAmount;
-                });
-                
-                console.log('可卖出资产列表：', allSellableAssets);
-                
-                // 开始凑钱
-                let additionalSellAllocated = 0;
-                for (const sellableAsset of allSellableAssets) {
-                    if (additionalSellAllocated >= additionalAmountNeeded) break;
-                    
-                    // 计算可以卖出的金额
-                    const canSell = Math.min(
-                        sellableAsset.maxSellAmount,
-                        additionalAmountNeeded - additionalSellAllocated
-                    );
-                    
-                    if (canSell > 0) {
-                        console.log(`从${sellableAsset.name}卖出: ¥${canSell}来凑30年国债ETF的购买金额`);
-                        
-                        // 检查是否已经在卖出列表中
-                        const existingSellItem = rebalanceNeeds.find(
-                            n => n.action === 'sell' && n.asset === sellableAsset.asset
-                        );
-                        
-                        if (existingSellItem) {
-                            // 如果已经在卖出列表中，增加卖出金额
-                            existingSellItem.amount += canSell;
-                        } else {
-                            // 如果不在卖出列表中，添加新的卖出项
-                            rebalanceNeeds.push({
-                                asset: sellableAsset.asset,
-                                name: sellableAsset.name,
-                                current: sellableAsset.percentage,
-                                target: sellableAsset.config.target,
-                                action: 'sell',
-                                amount: canSell
-                            });
-                        }
-                        
-                        additionalSellAllocated += canSell;
-                    }
-                }
-                
-                console.log(`总共凑到额外资金: ¥${additionalSellAllocated}（需要: ¥${additionalAmountNeeded}）`);
-                
-                // 强制凑够30年国债ETF的最小买入金额：即使需要卖出超过正常范围的资产也要凑够
-                if (additionalSellAllocated < additionalAmountNeeded) {
-                    console.log('需要强制卖出更多资产来凑够30年国债ETF的最小买入金额');
-                    
-                    // 找出所有可以卖出的资产，包括那些已经在正常范围内的资产
-                    const allPossibleSellableAssets = [];
-                    
-                    assets.forEach(asset => {
-                        // 跳过30年国债ETF本身
-                        if (asset === 'bond30') return;
-                        
-                        const config = portfolioConfig[asset];
-                        const currentAmount = amounts[asset];
-                        const percentage = (currentAmount / totalAmount) * 100;
-                        
-                        // 允许卖出更多，只要不低于最低比例
-                        const minSafeAmount = (config.min / 100) * totalAmount;
-                        const maxSellAmount = currentAmount - minSafeAmount;
-                        
-                        if (maxSellAmount > 0) {
-                            allPossibleSellableAssets.push({
-                                asset: asset,
-                                name: config.name,
-                                currentAmount: currentAmount,
-                                config: config,
-                                percentage: percentage,
-                                maxSellAmount: maxSellAmount,
-                                priority: assetTypePriority[asset] || 5
-                            });
-                        }
-                    });
-                    
-                    // 按优先级排序
-                    allPossibleSellableAssets.sort((a, b) => {
-                        if (a.priority !== b.priority) {
-                            return a.priority - b.priority;
-                        }
-                        return b.currentAmount - a.currentAmount;
-                    });
-                    
-                    console.log('强制卖出资产列表：', allPossibleSellableAssets);
-                    
-                    // 继续强制凑钱
-                    for (const sellableAsset of allPossibleSellableAssets) {
-                        if (additionalSellAllocated >= additionalAmountNeeded) break;
-                        
-                        // 计算可以卖出的金额（强制卖出，只要不低于最低比例）
-                        const canSell = Math.min(
-                            sellableAsset.maxSellAmount,
-                            additionalAmountNeeded - additionalSellAllocated
-                        );
-                        
-                        if (canSell > 0) {
-                            console.log(`强制从${sellableAsset.name}卖出: ¥${canSell}来凑30年国债ETF的购买金额`);
-                            
-                            // 检查是否已经在卖出列表中
-                            const existingSellItem = rebalanceNeeds.find(
-                                n => n.action === 'sell' && n.asset === sellableAsset.asset
-                            );
-                            
-                            if (existingSellItem) {
-                                // 如果已经在卖出列表中，增加卖出金额
-                                existingSellItem.amount += canSell;
-                            } else {
-                                // 如果不在卖出列表中，添加新的卖出项
-                                rebalanceNeeds.push({
-                                    asset: sellableAsset.asset,
-                                    name: sellableAsset.name,
-                                    current: sellableAsset.percentage,
-                                    target: sellableAsset.config.target,
-                                    action: 'sell',
-                                    amount: canSell
-                                });
-                            }
-                            
-                            additionalSellAllocated += canSell;
-                        }
-                    }
-                }
-                
-                console.log(`强制凑钱后总共凑到: ¥${additionalSellAllocated}（需要: ¥${additionalAmountNeeded}）`);
-                
-                // 计算最终的卖出总金额
-                const finalTotalSellAmount = rebalanceNeeds.filter(n => n.action === 'sell').reduce((sum, item) => sum + item.amount, 0);
-                console.log(`DEBUG - 最终卖出总金额: ${finalTotalSellAmount}`);
-                
-                // 强制确保30年国债ETF的买入金额为最小购买金额（除非真的无法凑够任何钱）
-                let finalBond30Need = Math.min(latestMinBond30Amount, finalTotalSellAmount);
-                console.log('DEBUG - 强制设置30年国债ETF买入金额为: ¥' + finalBond30Need);
-                console.log('DEBUG - 最新最小买入金额: ¥' + latestMinBond30Amount);
-                console.log('DEBUG - 最终总卖出金额: ¥' + finalTotalSellAmount);
-                
-                // 更新再平衡需求
-                const bond30RebalanceNeed = rebalanceNeeds.find(n => n.action === 'buy' && n.asset === 'bond30');
-                if (bond30RebalanceNeed) {
-                    // 如果已经有买入需求，更新金额
-                    bond30RebalanceNeed.amount = finalBond30Need;
-                } else {
-                    // 如果没有买入需求，添加新的买入需求
-                    rebalanceNeeds.push({
-                        asset: 'bond30',
-                        name: bond30Config.name,
-                        current: (bond30CurrentAmount / totalAmount) * 100,
-                        target: bond30Config.target,
-                        action: 'buy',
-                        amount: finalBond30Need
-                    });
-                }
-                
-                // 如果最终还是无法凑够最小买入金额，说明真的没有足够的资产可以卖出
-                if (finalBond30Need < latestMinBond30Amount) {
-                    console.log('即使强制卖出，仍无法凑够30年国债ETF的最小买入金额');
-                    const bond30WarningNeed = rebalanceNeeds.find(n => n.action === 'buy' && n.asset === 'bond30');
-                    if (bond30WarningNeed) {
-                        bond30WarningNeed.hasWarning = true;
-                        console.log('使用实际可负担的金额: ¥' + finalBond30Need);
-                    }
-                } else {
-                    console.log('成功凑够30年国债ETF的最小买入金额: ¥' + finalBond30Need);
-                }
 
             }
 
             // 更新整体状态
             document.getElementById('overallStatus').textContent = hasWarning ? '需要再平衡' : '配置正常';
 
+            // 调试代码：检查再平衡需求
+            console.log('DEBUG - calculateRebalance: rebalanceNeeds.length:', rebalanceNeeds.length);
+            console.log('DEBUG - calculateRebalance: rebalanceNeeds:', rebalanceNeeds);
+            console.log('DEBUG - calculateRebalance: sellNeeds:', sellNeeds);
+            console.log('DEBUG - calculateRebalance: buyNeeds:', buyNeeds);
+            
             // 显示再平衡建议
             if (rebalanceNeeds.length > 0) {
+                console.log('DEBUG - calculateRebalance: 调用showRebalanceSuggestions');
                 showRebalanceSuggestions(rebalanceNeeds, totalAmount);
+                // 确保再平衡建议显示
+                document.getElementById('rebalanceSuggestion').style.display = 'block';
+                console.log('DEBUG - calculateRebalance: 再平衡建议设置为显示');
             } else {
+                console.log('DEBUG - calculateRebalance: 隐藏再平衡建议');
                 document.getElementById('rebalanceSuggestion').style.display = 'none';
             }
         }
@@ -1543,15 +1247,75 @@
             const sellAssets = needs.filter(n => n.action === 'sell');
             const buyAssets = needs.filter(n => n.action === 'buy');
             
+            // 定义买入资产优先级：股票优先，然后黄金，再债券，最后货币基金
+            const buyAssetPriority = {
+                'sp500': 1,      // 股票优先买入
+                'gold': 2,       // 黄金次之
+                'bond30': 3,     // 债券次之
+                'moneyFund': 4   // 货币基金最后买入
+            };
+            
+            // 买入资产排序：首先按目标比例差（target - current）从大到小排序
+            // 比例差相同时，按资产类型优先级排序
+            buyAssets.sort((a, b) => {
+                // 计算目标比例差
+                const diffA = a.target - a.current;
+                const diffB = b.target - b.current;
+                
+                // 首先按目标比例差从大到小排序
+                if (diffB !== diffA) {
+                    return diffB - diffA;
+                }
+                
+                // 目标比例差相同时，按资产类型优先级排序
+                return buyAssetPriority[a.asset] - buyAssetPriority[b.asset];
+            });
+            
+            // 调试代码：检查买入资产排序后的结果
+            console.log('DEBUG - 排序后的买入资产:', buyAssets);
+            
+            // 调试代码：检查卖出需求
+            console.log('DEBUG - rebalanceNeeds:', needs);
+            console.log('DEBUG - sellAssets:', sellAssets);
+            console.log('DEBUG - buyAssets:', buyAssets);
+            
             // 计算总卖出金额和总买入需求
-            const totalSellAmount = sellAssets.reduce((sum, item) => sum + item.amount, 0);
-            const totalBuyAmount = buyAssets.reduce((sum, item) => sum + item.amount, 0);
+            let totalSellAmount = 0;
+            let totalBuyAmount = 0;
+            
+            // 调试：检查每个卖出资产的amount值和累加过程
+            sellAssets.forEach(item => {
+                console.log(`DEBUG - 卖出资产：${item.name}，amount：${item.amount}，类型：${typeof item.amount}`);
+                totalSellAmount += item.amount;
+                console.log(`DEBUG - 累加后totalSellAmount：${totalSellAmount}`);
+            });
+            
+            // 调试：检查每个买入资产的amount值和累加过程
+            buyAssets.forEach(item => {
+                console.log(`DEBUG - 买入资产：${item.name}，amount：${item.amount}，类型：${typeof item.amount}`);
+                totalBuyAmount += item.amount;
+                console.log(`DEBUG - 累加后totalBuyAmount：${totalBuyAmount}`);
+            });
+            
+            // 调试代码：检查金额计算
+            console.log('DEBUG - totalSellAmount:', totalSellAmount);
+            console.log('DEBUG - totalBuyAmount:', totalBuyAmount);
+            
+            // 检查浮点数精度问题
+            console.log('DEBUG - totalSellAmount > 0:', totalSellAmount > 0);
+            console.log('DEBUG - totalSellAmount.toFixed(2):', totalSellAmount.toFixed(2));
+            console.log('DEBUG - Math.abs(totalSellAmount) > 0.01:', Math.abs(totalSellAmount) > 0.01);
             
             // 调试：打印传入的buyAssets
             console.log('DEBUG - 传入的buyAssets:', buyAssets);
             
+            // 调试代码：检查是否显示再平衡方案
+            console.log('DEBUG - 是否显示再平衡方案:', totalSellAmount > 0 || totalBuyAmount > 0);
+            console.log('DEBUG - 使用阈值判断:', Math.abs(totalSellAmount) > 0.01 || Math.abs(totalBuyAmount) > 0.01);
+            
             // 如果有买卖操作，显示清晰的再平衡方案
-            if (totalSellAmount > 0 || totalBuyAmount > 0) {
+            // 使用阈值0.01来处理浮点数精度问题
+            if (Math.abs(totalSellAmount) > 0.01 || Math.abs(totalBuyAmount) > 0.01) {
                 html += `
                     <div style="margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px solid #007bff;">
                         <h3 style="margin: 0 0 20px 0; color: #007bff; text-align: center;">🔄 再平衡操作方案</h3>
@@ -1590,7 +1354,7 @@
                 
                 // 获取当前金额并计算买入分配
                 const currentAmounts = {};
-                ['sp500', 'a500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
+                ['sp500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
                     currentAmounts[asset] = parseFloat(document.getElementById(asset).value) || 0;
                 });
                 
@@ -1607,28 +1371,13 @@
                 console.log('当前配置:', currentAmounts);
                 console.log('买入资产列表:', buyAssets);
                 
-                // 首先处理30年国债ETF的最小买入金额需求
-                const bond30BuyAsset = buyAssets.find(asset => asset.asset === 'bond30');
-                if (bond30BuyAsset) {
-                    // 获取30年国债ETF的最小买入金额
-                    const latestMinBond30Amount = parseInt(localStorage.getItem('minBond30Amount')) || 10000;
-                    console.log('DEBUG - 30年国债ETF最小买入金额:', latestMinBond30Amount);
-                    console.log('DEBUG - 30年国债ETF当前买入需求:', bond30BuyAsset.amount);
-                    console.log('DEBUG - 剩余资金:', remainingFunds);
-                    
-                    // 确保30年国债ETF至少获得最小买入金额
-                    const bond30AllocateAmount = Math.min(latestMinBond30Amount, remainingFunds);
-                    idealAllocations['bond30'] = bond30AllocateAmount;
-                    remainingFunds -= bond30AllocateAmount;
-                    console.log('DEBUG - 30年国债ETF分配金额:', bond30AllocateAmount);
-                    console.log('DEBUG - 剩余资金:', remainingFunds);
-                }
+
                 
                 // 然后处理其他资产的买入需求
                 // 优先处理严重偏低的资产，然后再考虑其他优先级
                 // 找出严重偏低的资产（低于最小值很多的）
                 const currentAmountsForAnalysis = {};
-                const assets = ['sp500', 'a500', 'moneyFund', 'gold'];
+                const assets = ['sp500', 'moneyFund', 'gold'];
                 assets.forEach(asset => {
                     currentAmountsForAnalysis[asset] = parseFloat(document.getElementById(asset).value) || 0;
                 });
@@ -1716,15 +1465,11 @@
                         if (currentMoneyFundPercentage >= moneyFundConfig.max - 0.5) {
                             console.log('货币基金已接近或超过最大值，优先考虑其他资产');
                             
-                            // 尝试分配给30年国债ETF（如果满足最小买入金额）
+                            // 尝试分配给30年国债ETF
                             if (Object.keys(portfolioConfig).includes('bond30')) {
-                                // 直接从localStorage获取最新的最小买入金额设置
-                                const latestMinBond30Amount = parseInt(localStorage.getItem('minBond30Amount')) || 10000;
-                                if (remainingFunds >= latestMinBond30Amount) {
-                                    idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
-                                    console.log('剩余资金分配给30年国债ETF:', remainingFunds);
-                                    remainingFunds = 0;
-                                }
+                                idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
+                                console.log('剩余资金分配给30年国债ETF:', remainingFunds);
+                                remainingFunds = 0;
                             } else {
                                 // 检查是否有其他正常范围内的资产可以接收资金
                                 const otherAssets = ['sp500', 'a500', 'gold'].filter(asset => {
@@ -1756,12 +1501,8 @@
                             remainingFunds = 0;
                         }
                     } else if (remainingFunds > 0.01 && Object.keys(portfolioConfig).includes('bond30')) {
-                        // 检查30年国债ETF的最小买入金额
-                        const latestMinBond30Amount = parseInt(localStorage.getItem('minBond30Amount')) || 10000;
-                        if (remainingFunds >= latestMinBond30Amount) {
-                            idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
-                            console.log('剩余资金分配给30年国债ETF:', remainingFunds);
-                        }
+                        idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
+                        console.log('剩余资金分配给30年国债ETF:', remainingFunds);
                     }
                     
                     if (remainingFunds > 0.01) {
@@ -1882,7 +1623,7 @@
                     `;
                 }
                 
-                html += `<p style="margin-top: 15px; color: #666; text-align: center;">💡 提示：资金分配优先级：股票/黄金资产 → 债券资产（30年国债ETF最小购买金额为 ¥${minBond30Amount.toLocaleString('zh-CN')}）</p>`;
+                html += `<p style="margin-top: 15px; color: #666; text-align: center;">💡 提示：资金分配优先级：股票/黄金资产 → 债券资产</p>`;
             }
             
             contentDiv.innerHTML = html;
@@ -1923,7 +1664,6 @@
             
             // 按优先级顺序分配加仓金额
             let remainingAmount = additionalAmount;
-            const minBond30Amount = parseFloat(document.getElementById('minBond30Amount').value) || 10000;
             
             // 计算总目标比例
             const totalTargetPercentage = Object.values(portfolioConfig).reduce((sum, config) => sum + config.target, 0);
@@ -1953,25 +1693,14 @@
                 // 计算30年国债应分配的金额
                 const bond30Target = targetAllocations.bond30;
                 
-                // 检查30年国债的目标金额是否满足最小购买金额
-                if (bond30Target >= minBond30Amount) {
-                    // 如果目标金额满足最小购买金额，尝试分配
-                    if (remainingAmount >= bond30Target) {
-                        // 分配完整的目标金额
-                        allocationAmounts.bond30 = bond30Target;
-                        remainingAmount -= bond30Target;
-                    } else if (remainingAmount >= minBond30Amount) {
-                        // 如果剩余金额不够完整目标金额，但满足最小购买金额，分配剩余金额
-                        allocationAmounts.bond30 = remainingAmount;
-                        remainingAmount = 0;
-                    } else {
-                        // 如果剩余金额也不够最小购买金额，将30年国债的目标金额分配给货币基金
-                        allocationAmounts.moneyFund += bond30Target;
-                        remainingAmount = 0;
-                    }
+                // 直接分配30年国债的目标金额
+                if (remainingAmount >= bond30Target) {
+                    // 分配完整的目标金额
+                    allocationAmounts.bond30 = bond30Target;
+                    remainingAmount -= bond30Target;
                 } else {
-                    // 如果30年国债的目标金额不满足最小购买金额，将这部分金额分配给货币基金
-                    allocationAmounts.moneyFund += bond30Target;
+                    // 如果剩余金额不够完整目标金额，分配剩余金额
+                    allocationAmounts.bond30 = remainingAmount;
                     remainingAmount = 0;
                 }
             }
@@ -2053,8 +1782,7 @@
                     
                     <div style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #c8e6c9; font-size: 14px; color: #6c757d;">
                         <p style="margin-bottom: 10px;">
-                            💡 <strong>提示：</strong> 30年国债ETF最小买入金额为 ¥${minBond30Amount.toLocaleString('zh-CN')}，
-                            不足此金额的部分已自动分配给货币基金。
+                            💡 <strong>提示：</strong> 资金分配遵循资产优先级：股票/黄金资产 → 债券资产
                         </p>
                         <p>
                             🎯 加仓后，您的投资组合将更接近目标配置比例，有助于优化长期投资收益。
