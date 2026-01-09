@@ -791,6 +791,7 @@
                         <th>投资金额 (¥)</th>
                         <th>当前比例</th>
                         <th>状态</th>
+                        <th>触发阈值</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -801,6 +802,7 @@
                         <td><input type="number" class="amount-input" id="dividend" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="dividend-percentage">0%</td>
                         <td class="status normal" id="dividend-status">正常</td>
+                        <td>6%-14%</td>
                         <td><button class="action-btn" onclick="showRebalance('dividend')">再平衡</button></td>
                     </tr>
                     <tr>
@@ -809,6 +811,7 @@
                         <td><input type="number" class="amount-input" id="nasdaq" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="nasdaq-percentage">0%</td>
                         <td class="status normal" id="nasdaq-status">正常</td>
+                        <td>7.5%-17.5%</td>
                         <td><button class="action-btn" onclick="showRebalance('nasdaq')">再平衡</button></td>
                     </tr>
 
@@ -818,6 +821,7 @@
                         <td><input type="number" class="amount-input" id="csa500" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="csa500-percentage">0%</td>
                         <td class="status normal" id="csa500-status">正常</td>
+                        <td>7.5%-17.5%</td>
                         <td><button class="action-btn" onclick="showRebalance('csa500')">再平衡</button></td>
                     </tr>
 
@@ -827,6 +831,7 @@
                         <td><input type="number" class="amount-input" id="bond30" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="bond30-percentage">0%</td>
                         <td class="status normal" id="bond30-status">正常</td>
+                        <td>12%-28%</td>
                         <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
                     </tr>
                                         <tr>
@@ -835,6 +840,7 @@
                                             <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0" step="100"></td>
                                             <td class="percentage" id="gold-percentage">0%</td>
                                             <td class="status normal" id="gold-status">正常</td>
+                                            <td>15%-35%</td>
                                             <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
                                         </tr>
                     <tr>
@@ -843,14 +849,15 @@
                         <td><input type="number" class="amount-input" id="moneyFund" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="moneyFund-percentage">0%</td>
                         <td class="status normal" id="moneyFund-status">正常</td>
+                        <td>12%-28%</td>
                         <td><button class="action-btn" onclick="showRebalance('moneyFund')">再平衡</button></td>
                     </tr>
-
                     <tr class="total-row">
                         <td>总计</td>
                         <td>100%</td>
                         <td id="total-input">¥0.00</td>
                         <td id="total-percentage">100%</td>
+                        <td>-</td>
                         <td>-</td>
                         <td>-</td>
                     </tr>
@@ -958,11 +965,12 @@
             csa500: { name: '中证A500 ETF', target: 12.5, min: 7.5, max: 17.5 },
             bond30: { name: '30年国债ETF', target: 20, min: 12, max: 28 },
             gold: { name: '黄金ETF', target: 25, min: 15, max: 35 },
-            moneyFund: { name: '货币基金ETF', target: 20, min: 12, max: 28 }
+            moneyFund: { name: '货币基金ETF', target: 20, min: 12, max: 28 },
+            meiXiang: { name: '梅香资产', target: 0, min: 0, max: 0 }
         };
 
         function calculatePortfolio() {
-            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
+            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund', 'meiXiang'];
             let totalAmount = 0;
             const amounts = {};
             
