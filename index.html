@@ -796,6 +796,14 @@
                 </thead>
                 <tbody id="portfolioBody">
                     <tr>
+                        <td>红利ETF</td>
+                        <td class="target-percentage">10%</td>
+                        <td><input type="number" class="amount-input" id="dividend" placeholder="输入金额" min="0" step="100"></td>
+                        <td class="percentage" id="dividend-percentage">0%</td>
+                        <td class="status normal" id="dividend-status">正常</td>
+                        <td><button class="action-btn" onclick="showRebalance('dividend')">再平衡</button></td>
+                    </tr>
+                    <tr>
                         <td>纳指ETF</td>
                         <td class="target-percentage">12.5%</td>
                         <td><input type="number" class="amount-input" id="nasdaq" placeholder="输入金额" min="0" step="100"></td>
@@ -815,7 +823,7 @@
 
                     <tr>
                         <td>30年国债ETF</td>
-                        <td class="target-percentage">25%</td>
+                        <td class="target-percentage">20%</td>
                         <td><input type="number" class="amount-input" id="bond30" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="bond30-percentage">0%</td>
                         <td class="status normal" id="bond30-status">正常</td>
@@ -831,7 +839,7 @@
                                         </tr>
                     <tr>
                         <td>货币基金ETF</td>
-                        <td class="target-percentage">25%</td>
+                        <td class="target-percentage">20%</td>
                         <td><input type="number" class="amount-input" id="moneyFund" placeholder="输入金额" min="0" step="100"></td>
                         <td class="percentage" id="moneyFund-percentage">0%</td>
                         <td class="status normal" id="moneyFund-status">正常</td>
@@ -881,9 +889,14 @@
             // 计算操作后的金额
             const afterAmounts = {};
             Object.keys(portfolioConfig).forEach(assetKey => {
-                const sellAmount = sellAssets.find(sell => sell.asset === assetKey)?.amount || 0;
-                const buyAmount = buyAllocations[assetKey] || 0;
-                afterAmounts[assetKey] = currentAmounts[assetKey] - sellAmount + buyAmount;
+                const currentAmount = parseFloat(currentAmounts[assetKey]) || 0;
+                const sellAmount = parseFloat(sellAssets.find(sell => sell.asset === assetKey)?.amount) || 0;
+                const buyAmount = parseFloat(buyAllocations[assetKey]) || 0;
+                afterAmounts[assetKey] = currentAmount - sellAmount + buyAmount;
+                // 确保金额不是NaN且不小于0
+                if (isNaN(afterAmounts[assetKey]) || afterAmounts[assetKey] < 0) {
+                    afterAmounts[assetKey] = 0;
+                }
             });
             
             // 计算操作后总金额
@@ -940,15 +953,16 @@
 
 
         const portfolioConfig = {
-            nasdaq: { name: '纳指ETF', target: 12.5, min: 10, max: 15 },
-            csa500: { name: '中证A500 ETF', target: 12.5, min: 10, max: 15 },
-            bond30: { name: '30年国债ETF', target: 25, min: 15, max: 35 },
+            dividend: { name: '红利ETF', target: 10, min: 6, max: 14 },
+            nasdaq: { name: '纳指ETF', target: 12.5, min: 7.5, max: 17.5 },
+            csa500: { name: '中证A500 ETF', target: 12.5, min: 7.5, max: 17.5 },
+            bond30: { name: '30年国债ETF', target: 20, min: 12, max: 28 },
             gold: { name: '黄金ETF', target: 25, min: 15, max: 35 },
-            moneyFund: { name: '货币基金ETF', target: 25, min: 15, max: 35 }
+            moneyFund: { name: '货币基金ETF', target: 20, min: 12, max: 28 }
         };
 
         function calculatePortfolio() {
-            const assets = ['nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
+            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
             let totalAmount = 0;
             const amounts = {};
             
@@ -1033,30 +1047,64 @@
                         amount: excess,
                         excessRatio: percentage - config.target
                     });
+                } else if (percentage > config.target + 1) {
+                    // 比例超过目标值2%以上，也标记为需要调整
+                    statusElement.textContent = '略高';
+                    statusElement.className = 'status warning';
+                    hasWarning = true;
+                    const targetAmount = (config.target / 100 * totalAmount);
+                    const excess = amounts[asset] - targetAmount;
+                    // 卖出全部超额部分，使比例达到目标值
+                    const adjustedExcess = excess; // 卖出100%的超额部分
+
+                    // 调试代码：检查超出金额计算
+                    console.log(`DEBUG - ${asset}略高：当前金额=${amounts[asset]}，目标金额=${targetAmount}，调整金额=${adjustedExcess}`);
+                    console.log(`DEBUG - ${asset}当前比例=${percentage}%，目标比例=${config.target}%，超出比例=${percentage - config.target}%`);
+
+                    sellNeeds.push({
+                        asset: asset,
+                        name: config.name,
+                        current: percentage,
+                        target: config.target,
+                        action: 'sell',
+                        amount: adjustedExcess,
+                        excessRatio: percentage - config.target
+                    });
+                } else if (percentage < config.target - 1) {
+                    // 比例低于目标值2%以上，也标记为需要买入
+                    statusElement.textContent = '略低';
+                    statusElement.className = 'status warning';
+                    hasWarning = true;
+                    const needed = (config.target / 100 * totalAmount) - amounts[asset];
+                    // 买入全部不足部分，使比例达到目标值
+                    const adjustedNeeded = needed; // 买入100%的不足部分
+
+                    rebalanceNeeds.push({
+                        asset: asset,
+                        name: config.name,
+                        current: percentage,
+                        target: config.target,
+                        action: 'buy',
+                        amount: adjustedNeeded
+                    });
+                    buyNeeds.push({
+                        asset: asset,
+                        name: config.name,
+                        current: percentage,
+                        target: config.target,
+                        needed: adjustedNeeded
+                    });
                 } else {
                     statusElement.textContent = '正常';
                     statusElement.className = 'status normal';
                 }
             });
             
-            // 优化初始卖出需求的排序：优先卖出比例超出目标多的资产
-            // 定义资产类型优先级：调整债券和黄金的优先级，使其更容易被卖出
-            const sellAssetPriority = {
-                'gold': 1,       // 黄金优先卖出
-                'bond30': 2,     // 债券次之
-                'moneyFund': 3,  // 货币基金次之
-                'nasdaq': 4,     // 纳指次之
-                'csa500': 5      // 中证A500最后卖出
-            };
-            
+            // 改进的卖出资产排序：仅按超出目标比例程度从高到低排序
+            // 超出比例越大的资产优先卖出
             sellNeeds.sort((a, b) => {
-                // 首先按超出目标比例程度从高到低排序
-                if (b.excessRatio !== a.excessRatio) {
-                    return b.excessRatio - a.excessRatio;
-                }
-                
-                // 超出比例相同时，按资产类型优先级排序
-                return sellAssetPriority[a.asset] - sellAssetPriority[b.asset];
+                // 仅按超出目标比例程度从高到低排序
+                return b.excessRatio - a.excessRatio;
             });
             
             // 调试代码：检查卖出需求排序后的结果
@@ -1138,27 +1186,12 @@
                     }
                 });
                 
-                // 定义资产类型优先级：货币基金、黄金优先于股票和债券
-                const assetTypePriority = {
-                    'moneyFund': 1,  // 货币基金优先卖出
-                    'gold': 2,     // 黄金次之
-                    'nasdaq': 3,    // 纳指次之
-                    'csa500': 4,    // 中证A500次之
-                    'bond30': 5   // 债券最后卖出
-                };
-                
-                // 按照超出目标比例程度从高到低排序，当超出比例相同时，债券、黄金、原油优先于股票
+                // 按照超出目标比例程度从高到低排序
                 adjustableAssets.sort((a, b) => {
                     const aExcessRatio = a.percentage - a.config.target;
                     const bExcessRatio = b.percentage - b.config.target;
-                    
-                    // 首先按超出比例排序
-                    if (bExcessRatio !== aExcessRatio) {
-                        return bExcessRatio - aExcessRatio;
-                    }
-                    
-                    // 超出比例相同时，按资产类型优先级排序
-                    return assetTypePriority[a.asset] - assetTypePriority[b.asset];
+                    // 仅按超出目标比例程度从高到低排序，不设置资产类型优先级
+                    return bExcessRatio - aExcessRatio;
                 });
                 console.log('可调整的正常资产（按超出目标比例从高到低排序）:', adjustableAssets);
                 
@@ -1261,29 +1294,12 @@
             const sellAssets = needs.filter(n => n.action === 'sell');
             const buyAssets = needs.filter(n => n.action === 'buy');
             
-            // 定义买入资产优先级：股票优先，然后黄金，再债券，最后货币基金
-            const buyAssetPriority = {
-                'nasdaq': 1,      // 纳指优先买入
-                'csa500': 2,      // 中证A500次之
-                'gold': 3,       // 黄金次之
-                'bond30': 4,     // 债券次之
-                'moneyFund': 5   // 货币基金最后买入
-            };
-            
-            // 买入资产排序：首先按目标比例差（target - current）从大到小排序
-            // 比例差相同时，按资产类型优先级排序
+            // 买入资产仅按目标比例差（target - current）从大到小排序
+            // 移除所有资产类型优先级
             buyAssets.sort((a, b) => {
-                // 计算目标比例差
                 const diffA = a.target - a.current;
                 const diffB = b.target - b.current;
-                
-                // 首先按目标比例差从大到小排序
-                if (diffB !== diffA) {
-                    return diffB - diffA;
-                }
-                
-                // 目标比例差相同时，按资产类型优先级排序
-                return buyAssetPriority[a.asset] - buyAssetPriority[b.asset];
+                return diffB - diffA;
             });
             
             // 调试代码：检查买入资产排序后的结果
@@ -1369,7 +1385,7 @@
                 
                 // 获取当前金额并计算买入分配
                 const currentAmounts = {};
-                ['nasdaq', 'csa500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
+                ['dividend', 'nasdaq', 'csa500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
                     const element = document.getElementById(asset);
                     currentAmounts[asset] = element ? parseFloat(element.value) || 0 : 0;
                 });
@@ -1393,59 +1409,23 @@
                 
 
                 
-                // 然后处理其他资产的买入需求
-                // 优先处理严重偏低的资产，然后再考虑其他优先级
-                // 找出严重偏低的资产（低于最小值很多的）
-                const currentAmountsForAnalysis = {};
-                const assets = ['nasdaq', 'csa500', 'moneyFund', 'gold'];
-                assets.forEach(asset => {
-                    const element = document.getElementById(asset);
-                    currentAmountsForAnalysis[asset] = element ? parseFloat(element.value) || 0 : 0;
-                });
-                const severelyUnderweightAssets = [];
-                buyAssets.forEach(asset => {
-                    // 跳过已经处理过的30年国债ETF
-                    if (asset.asset === 'bond30') return;
-                    
-                    const config = portfolioConfig[asset.asset];
-                    const currentAmount = currentAmountsForAnalysis[asset.asset];
-                    const currentPercentage = (currentAmount / totalAmount) * 100;
-                    const shortageRatio = (config.target - currentPercentage) / (config.target - config.min);
-                    
-                    if (shortageRatio > 0.5) { // 超过50%的不足比例视为严重偏低
-                        severelyUnderweightAssets.push(asset.asset);
-                    }
-                });
-                
-                console.log('严重偏低的资产:', severelyUnderweightAssets);
-                
-                // 定义资产优先级，严重偏低的资产优先级最高
-                const priorityOrder = [
-                    ...severelyUnderweightAssets, // 严重偏低的资产优先
-                    'nasdaq', 'csa500', 'gold', 'moneyFund' // 常规优先级（已跳过bond30）
-                ].filter((value, index, self) => self.indexOf(value) === index); // 去重
-                
-                const receivingAssets = Object.keys(portfolioConfig).filter(assetKey => 
-                    !sellAssets.some(sell => sell.asset === assetKey) && assetKey !== 'bond30' // 跳过已经处理过的bond30
-                );
-                
-                const prioritizedAssets = receivingAssets.filter(asset => 
-                    priorityOrder.includes(asset)
-                ).sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b));
-                
-                console.log('按优先级排序的接收资产:', prioritizedAssets);
-                
-                // 计算需要买入的资产总比例差值
-                const assetsNeedingIncrease = [];
+                // 计算所有需要买入的资产及其比例差值
+                let assetsNeedingIncrease = [];
                 let totalPercentageDiff = 0;
                 
-                prioritizedAssets.forEach(assetKey => {
+                // 收集所有需要买入的资产（排除已卖出的资产）
+                const allAssets = Object.keys(portfolioConfig);
+                allAssets.forEach(assetKey => {
+                    // 跳过已经卖出的资产
+                    if (sellAssets.some(sell => sell.asset === assetKey)) return;
+                    
                     const config = portfolioConfig[assetKey];
                     const currentAmount = currentAmounts[assetKey];
                     const currentPercentage = (currentAmount / totalAmount) * 100;
                     const diff = config.target - currentPercentage;
                     
-                    if (diff > 0) { // 只要比例低于目标，就认为需要增加
+                    // 只要比例低于目标，就认为需要增加
+                    if (diff > 0) {
                         assetsNeedingIncrease.push({asset: assetKey, diff: diff, target: config.target});
                         totalPercentageDiff += diff;
                     }
@@ -1475,19 +1455,6 @@
                         console.log(`DEBUG - 为${item.asset}按比例差值分配金额: ¥${finalAmount}`);
                     });
                 }
-                
-                // 原有逻辑作为补充，但主要资金应先通过比例差值分配
-                prioritizedAssets.forEach(assetKey => {
-                    if (remainingFunds <= 0.01) return; // 资金已分配完毕
-                    
-                    const need = buyAssets.find(item => item.asset === assetKey);
-                    if (need && need.amount > 0) {
-                        const allocateAmount = Math.min(need.amount, remainingFunds);
-                        idealAllocations[assetKey] = (idealAllocations[assetKey] || 0) + allocateAmount;
-                        remainingFunds -= allocateAmount;
-                        console.log(`DEBUG - 补充分配给${assetKey}金额: ¥${allocateAmount}`);
-                    }
-                });
                 
                 // 将剩余资金分配给需要的资产，优先考虑非债券类和偏低资产
                 if (remainingFunds > 0.01) {
@@ -1532,7 +1499,7 @@
                                 remainingFunds = 0;
                             } else {
                                 // 检查是否有其他正常范围内的资产可以接收资金
-                                const otherAssets = ['nasdaq', 'csa500', 'gold'].filter(asset => {
+                                const otherAssets = ['dividend', 'nasdaq', 'csa500', 'gold'].filter(asset => {
                                     const config = portfolioConfig[asset];
                                     const currentAmount = currentAmounts[asset] + (idealAllocations[asset] || 0);
                                     const currentPercentage = (currentAmount / totalAmount) * 100;
@@ -1580,13 +1547,17 @@
                 Object.entries(idealAllocations).forEach(([assetKey, amount]) => {
                     if (amount > 0) {
                         const config = portfolioConfig[assetKey];
-                        const percentage = ((amount / totalAmount) * 100).toFixed(2);
+                        const currentAmount = currentAmounts[assetKey] || 0;
+                        const newAmount = currentAmount + amount;
+                        const newPercentage = ((newAmount / totalAmount) * 100).toFixed(2);
+                        const targetPercentage = config.target;
+
                         html += `
                             <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 5px; border: 1px solid #e8f5e8;">
                                 <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">${config.name}</div>
                                 <div style="color: #666; font-size: 0.9em;">
                                     买入金额：<span style="color: #2e7d32; font-weight: bold;">¥${amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
-                                    (${percentage}%)
+                                    <div>买入后比例：<span style="color: #2e7d32; font-weight: bold;">${newPercentage}%</span> (目标: ${targetPercentage}%)</div>
                                 </div>
                             </div>
                         `;
@@ -1713,8 +1684,8 @@
                 return;
             }
             
-            // 设置资产分配优先级：纳指→中证A500→黄金→货币基金→30年国债
-            const assetPriorityOrder = ['nasdaq', 'csa500', 'gold', 'moneyFund', 'bond30'];
+            // 设置资产分配优先级：纳指→中证A500→黄金→30年国债→货币基金
+            const assetPriorityOrder = ['dividend', 'nasdaq', 'csa500', 'gold', 'bond30', 'moneyFund'];
             
             // 初始化分配金额
             const allocationAmounts = {};
@@ -1739,8 +1710,8 @@
             for (const asset of assetPriorityOrder) {
                 if (remainingAmount <= 0) break;
                 
-                // 跳过30年国债，最后处理
-                if (asset === 'bond30') continue;
+                // 跳过货币基金，最后处理
+                if (asset === 'moneyFund') continue;
                 
                 // 分配目标金额
                 const allocateAmount = Math.min(remainingAmount, targetAllocations[asset]);
@@ -1765,9 +1736,9 @@
                 }
             }
             
-            // 如果还有剩余金额，全部分配给货币基金
+            // 如果还有剩余金额，全部分配给30年国债
             if (remainingAmount > 0) {
-                allocationAmounts.moneyFund += remainingAmount;
+                allocationAmounts.bond30 += remainingAmount;
                 remainingAmount = 0;
             }
             
@@ -1857,6 +1828,7 @@
             resultDiv.style.display = 'block';
             
             // 调用displayAfterOperations函数显示操作后配置预览
+            const newTotalAmount = totalCurrentAmount + additionalAmount;
             displayAfterOperations(currentAmounts, [], allocationAmounts, newTotalAmount);
         }
         
