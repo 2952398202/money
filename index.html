@@ -762,6 +762,25 @@
 
             <button class="calculate-btn" onclick="calculatePortfolio()">计算组合配置</button>
             
+            <!-- 总金额分配功能 -->
+            <div style="margin: 30px 0; padding: 20px; background: #f3e5f5; border-radius: 10px; border: 1px solid #e1bee7;">
+                <h3 style="color: #7b1fa2; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    🎯 总金额分配
+                </h3>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="totalInvestmentAmount" style="font-weight: 500; color: #495057;">总投资金额：</label>
+                        <input type="number" id="totalInvestmentAmount" placeholder="输入总投资金额" min="0" step="100" 
+                               style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        <span style="color: #6c757d;">元</span>
+                    </div>
+                    <button onclick="allocateTotalAmount()" 
+                            style="background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
+                        自动分配金额
+                    </button>
+                </div>
+            </div>
+            
             <!-- 加仓金额分配功能 -->
             <div style="margin: 30px 0; padding: 20px; background: #e3f2fd; border-radius: 10px; border: 1px solid #bbdefb;">
                 <h3 style="color: #1976d2; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
@@ -887,6 +906,32 @@
             });
         });
 
+        // 总金额分配功能
+        function allocateTotalAmount() {
+            const totalAmount = parseFloat(document.getElementById('totalInvestmentAmount').value) || 0;
+            
+            if (totalAmount <= 0) {
+                alert('请输入有效的总投资金额');
+                return;
+            }
+            
+            // 根据目标比例分配金额
+            Object.keys(portfolioConfig).forEach(assetKey => {
+                const targetPercentage = portfolioConfig[assetKey].target;
+                const allocatedAmount = (totalAmount * targetPercentage) / 100;
+                // 四舍五入到最近的整数
+                const roundedAmount = Math.round(allocatedAmount);
+                
+                const inputElement = document.getElementById(assetKey);
+                if (inputElement) {
+                    inputElement.value = roundedAmount;
+                }
+            });
+            
+            // 重新计算组合配置
+            calculatePortfolio();
+        }
+
         // 保存设置功能
         function displayAfterOperations(currentAmounts, sellAssets, buyAllocations, totalAmount) {
             const afterOperationsGrid = document.querySelector('.after-operations-grid');
@@ -966,11 +1011,10 @@
             bond30: { name: '30年国债ETF', target: 20, min: 12, max: 28 },
             gold: { name: '黄金ETF', target: 25, min: 15, max: 35 },
             moneyFund: { name: '货币基金ETF', target: 20, min: 12, max: 28 },
-            meiXiang: { name: '梅香资产', target: 0, min: 0, max: 0 }
         };
 
         function calculatePortfolio() {
-            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund', 'meiXiang'];
+            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
             let totalAmount = 0;
             const amounts = {};
             
