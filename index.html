@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>全天候交易组合管理</title>
+    <title>交易组合管理</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +35,7 @@
             --info: #3b82f6;
             --info-light: #60a5fa;
             --info-dark: #2563eb;
-            
+
             /* 中性色 */
             --bg-primary: #ffffff;
             --bg-secondary: #f8fafc;
@@ -61,7 +62,7 @@
             margin: 0 auto;
             background: var(--bg-primary);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: all 0.3s ease;
         }
@@ -77,88 +78,88 @@
             body {
                 padding: 10px;
             }
-            
+
             .container {
                 border-radius: 15px;
                 margin: 0;
             }
-            
+
             .header {
                 padding: 20px 15px;
             }
-            
+
             .header h1 {
                 font-size: 1.8em;
             }
-            
+
             .header p {
                 font-size: 1em;
             }
-            
+
             .content {
                 padding: 20px 15px;
             }
-            
+
             .calculate-btn {
                 width: 100%;
                 padding: 12px 20px;
                 font-size: 16px;
             }
-            
+
             .action-btn {
                 padding: 8px 16px;
                 font-size: 14px;
             }
-            
+
             .setting-input {
                 width: 120px;
             }
-            
+
             .setting-item {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 15px;
             }
-            
+
             .summary-item {
                 font-size: 14px;
             }
-            
+
             .rebalance-grid {
                 grid-template-columns: 1fr !important;
             }
         }
-        
+
         @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.5em;
             }
-            
+
             .setting-input {
                 width: 100%;
             }
-            
+
             /* 表格元素响应式优化 */
             .portfolio-table th,
             .portfolio-table td {
                 padding: 10px 8px;
                 font-size: 14px;
             }
-            
+
             .amount-input {
                 font-size: 14px;
                 padding: 8px;
             }
-            
+
             .table-container {
                 border-radius: 8px;
             }
-            
+
             /* 再平衡建议区域响应式 */
             .rebalance-suggestion {
                 padding: 15px;
             }
-            
+
             .after-operations-grid {
                 grid-template-columns: 1fr;
             }
@@ -208,12 +209,12 @@
             -webkit-overflow-scrolling: touch;
             margin-bottom: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: box-shadow 0.3s ease;
         }
 
         .table-container:hover {
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         .portfolio-table {
@@ -329,18 +330,18 @@
             font-size: 14px;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
         }
 
         .action-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .summary {
@@ -348,7 +349,7 @@
             padding: 24px;
             border-radius: 12px;
             margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .summary h3 {
@@ -372,7 +373,7 @@
 
         .summary-item:hover {
             border-color: var(--border-hover);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .summary-item:last-child {
@@ -385,7 +386,7 @@
             padding: 24px;
             border-radius: 12px;
             margin-top: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .rebalance-suggestion h3 {
@@ -406,7 +407,7 @@
         }
 
         .rebalance-item:hover {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .calculate-btn {
@@ -420,7 +421,7 @@
             font-weight: 600;
             margin-bottom: 24px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -428,15 +429,15 @@
 
         .calculate-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary) 100%);
         }
 
         .calculate-btn:active {
             transform: translateY(0);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* 按钮组样式 */
         .btn-group {
             display: flex;
@@ -444,7 +445,7 @@
             flex-wrap: wrap;
             margin-bottom: 24px;
         }
-        
+
         /* 卡片样式 */
         .card {
             background: var(--bg-primary);
@@ -453,32 +454,32 @@
             padding: 20px;
             margin-bottom: 20px;
             transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-color: var(--border-hover);
         }
-        
+
         .card-header {
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .card-title {
             font-size: 1.25em;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 4px;
         }
-        
+
         .card-subtitle {
             font-size: 0.875em;
             color: var(--text-secondary);
         }
-        
+
         /* 网格布局 */
         .grid {
             display: grid;
@@ -486,7 +487,7 @@
             gap: 20px;
             margin-bottom: 24px;
         }
-        
+
         /* 标签样式 */
         .tag {
             display: inline-block;
@@ -497,27 +498,27 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        
+
         .tag-primary {
             background-color: var(--primary-light);
             color: var(--primary-dark);
         }
-        
+
         .tag-secondary {
             background-color: var(--secondary-light);
             color: var(--secondary-dark);
         }
-        
+
         .tag-accent {
             background-color: var(--accent-light);
             color: var(--accent-dark);
         }
-        
+
         /* 输入组样式 */
         .input-group {
             margin-bottom: 16px;
         }
-        
+
         .input-label {
             display: block;
             margin-bottom: 4px;
@@ -525,7 +526,7 @@
             color: var(--text-primary);
             font-size: 0.875em;
         }
-        
+
         .input-field {
             width: 100%;
             padding: 8px 12px;
@@ -536,41 +537,42 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
         }
-        
+
         .input-field:focus {
             outline: none;
             border-color: var(--primary-light);
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
-        
+
         /* 加载状态 */
         .loading {
             opacity: 0.6;
             pointer-events: none;
         }
-        
+
         /* 动画效果 */
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
-        
+
         /* 工具提示 */
         .tooltip {
             position: relative;
             display: inline-block;
         }
-        
+
         .tooltip:hover::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -584,16 +586,16 @@
             font-size: 0.75em;
             white-space: nowrap;
             z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* 分割线 */
         .divider {
             height: 1px;
             background-color: var(--border-color);
             margin: 24px 0;
         }
-        
+
         /* 设置面板 */
         .settings-panel {
             background: var(--bg-secondary);
@@ -601,9 +603,9 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .settings-title {
             font-size: 1.125em;
             font-weight: 600;
@@ -613,7 +615,7 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .setting-item {
             display: flex;
             align-items: center;
@@ -624,13 +626,13 @@
             border-radius: 8px;
             border: 1px solid var(--border-color);
         }
-        
+
         .setting-label {
             font-weight: 500;
             color: var(--text-primary);
             flex: 1;
         }
-        
+
         .setting-input {
             width: 150px;
             padding: 8px 12px;
@@ -639,7 +641,7 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        
+
         .setting-input:focus {
             outline: none;
             border-color: var(--primary-light);
@@ -724,23 +726,27 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>全天候交易组合管理</h1>
             <p>智能资产配置与再平衡操作系统</p>
         </div>
-        
+
         <div class="content">
             <!-- 操作后配置预览 -->
-            <div class="after-operations" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+            <div class="after-operations"
+                style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
                 <h4 style="margin: 0 0 15px 0; color: #28a745; font-size: 14px;">
                     📊 操作后配置预览
                 </h4>
-                <div class="after-operations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <div class="after-operations-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
                     <!-- 这里将通过JavaScript动态生成 -->
                 </div>
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+                <div
+                    style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>💡 操作后总资产: <strong id="after-total-amount" style="color: #28a745;">¥0</strong></span>
                         <span>📈 与目标偏差: <strong id="target-deviation" style="color: #17a2b8;">计算中...</strong></span>
@@ -761,127 +767,125 @@
             </div>
 
             <button class="calculate-btn" onclick="calculatePortfolio()">计算组合配置</button>
-            
+
             <!-- 总金额分配功能 -->
-            <div style="margin: 30px 0; padding: 20px; background: #f3e5f5; border-radius: 10px; border: 1px solid #e1bee7;">
+            <div
+                style="margin: 30px 0; padding: 20px; background: #f3e5f5; border-radius: 10px; border: 1px solid #e1bee7;">
                 <h3 style="color: #7b1fa2; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                     🎯 总金额分配
                 </h3>
                 <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="totalInvestmentAmount" style="font-weight: 500; color: #495057;">总投资金额：</label>
-                        <input type="number" id="totalInvestmentAmount" placeholder="输入总投资金额" min="0" step="100" 
-                               style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        <input type="number" id="totalInvestmentAmount" placeholder="输入总投资金额" min="0" step="100"
+                            style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
                         <span style="color: #6c757d;">元</span>
                     </div>
-                    <button onclick="allocateTotalAmount()" 
-                            style="background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
+                    <button onclick="allocateTotalAmount()"
+                        style="background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
                         自动分配金额
                     </button>
                 </div>
             </div>
-            
+
             <!-- 加仓金额分配功能 -->
-            <div style="margin: 30px 0; padding: 20px; background: #e3f2fd; border-radius: 10px; border: 1px solid #bbdefb;">
+            <div
+                style="margin: 30px 0; padding: 20px; background: #e3f2fd; border-radius: 10px; border: 1px solid #bbdefb;">
                 <h3 style="color: #1976d2; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                     📈 加仓金额分配
                 </h3>
                 <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="additionalAmount" style="font-weight: 500; color: #495057;">加仓金额：</label>
-                        <input type="number" id="additionalAmount" placeholder="输入加仓金额" min="0" step="100" 
-                               style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        <input type="number" id="additionalAmount" placeholder="输入加仓金额" min="0" step="100"
+                            style="width: 180px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
                         <span style="color: #6c757d;">元</span>
                     </div>
-                    <button onclick="calculateAdditionalAllocation()" 
-                            style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
+                    <button onclick="calculateAdditionalAllocation()"
+                        style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: transform 0.2s;">
                         计算加仓分配
                     </button>
                 </div>
                 <div id="additionalAllocationResult" style="margin-top: 20px; display: none;"></div>
             </div>
-            
+
             <div class="table-container">
-            <table class="portfolio-table">
-                <thead>
-                    <tr>
-                        <th>资产类别</th>
-                        <th>目标比例</th>
-                        <th>投资金额 (¥)</th>
-                        <th>当前比例</th>
-                        <th>状态</th>
-                        <th>触发阈值</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="portfolioBody">
-                    <tr>
-                        <td>红利ETF</td>
-                        <td class="target-percentage">10%</td>
-                        <td><input type="number" class="amount-input" id="dividend" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="dividend-percentage">0%</td>
-                        <td class="status normal" id="dividend-status">正常</td>
-                        <td>6%-14%</td>
-                        <td><button class="action-btn" onclick="showRebalance('dividend')">再平衡</button></td>
-                    </tr>
-                    <tr>
-                        <td>纳指ETF</td>
-                        <td class="target-percentage">12.5%</td>
-                        <td><input type="number" class="amount-input" id="nasdaq" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="nasdaq-percentage">0%</td>
-                        <td class="status normal" id="nasdaq-status">正常</td>
-                        <td>7.5%-17.5%</td>
-                        <td><button class="action-btn" onclick="showRebalance('nasdaq')">再平衡</button></td>
-                    </tr>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>资产类别</th>
+                            <th>目标比例</th>
+                            <th>投资金额 (¥)</th>
+                            <th>当前比例</th>
+                            <th>状态</th>
+                            <th>触发阈值</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolioBody">
+                        <tr>
+                            <td>纳指ETF</td>
+                            <td class="target-percentage">12.5%</td>
+                            <td><input type="number" class="amount-input" id="nasdaq" placeholder="输入金额" min="0"
+                                    step="100"></td>
+                            <td class="percentage" id="nasdaq-percentage">0%</td>
+                            <td class="status normal" id="nasdaq-status">正常</td>
+                            <td>7.5%-17.5%</td>
+                            <td><button class="action-btn" onclick="showRebalance('nasdaq')">再平衡</button></td>
+                        </tr>
 
-                    <tr>
-                        <td>中证A500 ETF</td>
-                        <td class="target-percentage">12.5%</td>
-                        <td><input type="number" class="amount-input" id="csa500" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="csa500-percentage">0%</td>
-                        <td class="status normal" id="csa500-status">正常</td>
-                        <td>7.5%-17.5%</td>
-                        <td><button class="action-btn" onclick="showRebalance('csa500')">再平衡</button></td>
-                    </tr>
+                        <tr>
+                            <td>中证A500 ETF</td>
+                            <td class="target-percentage">12.5%</td>
+                            <td><input type="number" class="amount-input" id="csa500" placeholder="输入金额" min="0"
+                                    step="100"></td>
+                            <td class="percentage" id="csa500-percentage">0%</td>
+                            <td class="status normal" id="csa500-status">正常</td>
+                            <td>7.5%-17.5%</td>
+                            <td><button class="action-btn" onclick="showRebalance('csa500')">再平衡</button></td>
+                        </tr>
 
-                    <tr>
-                        <td>30年国债ETF</td>
-                        <td class="target-percentage">20%</td>
-                        <td><input type="number" class="amount-input" id="bond30" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="bond30-percentage">0%</td>
-                        <td class="status normal" id="bond30-status">正常</td>
-                        <td>12%-28%</td>
-                        <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
-                    </tr>
-                                        <tr>
-                                            <td>黄金ETF</td>
-                                            <td class="target-percentage">25%</td>
-                                            <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0" step="100"></td>
-                                            <td class="percentage" id="gold-percentage">0%</td>
-                                            <td class="status normal" id="gold-status">正常</td>
-                                            <td>15%-35%</td>
-                                            <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
-                                        </tr>
-                    <tr>
-                        <td>货币基金ETF</td>
-                        <td class="target-percentage">20%</td>
-                        <td><input type="number" class="amount-input" id="moneyFund" placeholder="输入金额" min="0" step="100"></td>
-                        <td class="percentage" id="moneyFund-percentage">0%</td>
-                        <td class="status normal" id="moneyFund-status">正常</td>
-                        <td>12%-28%</td>
-                        <td><button class="action-btn" onclick="showRebalance('moneyFund')">再平衡</button></td>
-                    </tr>
-                    <tr class="total-row">
-                        <td>总计</td>
-                        <td>100%</td>
-                        <td id="total-input">¥0.00</td>
-                        <td id="total-percentage">100%</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                </tbody>
-            </table>
+                        <tr>
+                            <td>30年国债ETF</td>
+                            <td class="target-percentage">30%</td>
+                            <td><input type="number" class="amount-input" id="bond30" placeholder="输入金额" min="0"
+                                    step="100"></td>
+                            <td class="percentage" id="bond30-percentage">0%</td>
+                            <td class="status normal" id="bond30-status">正常</td>
+                            <td>20%-40%</td>
+                            <td><button class="action-btn" onclick="showRebalance('bond30')">再平衡</button></td>
+                        </tr>
+                        <tr>
+                            <td>黄金ETF</td>
+                            <td class="target-percentage">25%</td>
+                            <td><input type="number" class="amount-input" id="gold" placeholder="输入金额" min="0"
+                                    step="100"></td>
+                            <td class="percentage" id="gold-percentage">0%</td>
+                            <td class="status normal" id="gold-status">正常</td>
+                            <td>15%-35%</td>
+                            <td><button class="action-btn" onclick="showRebalance('gold')">再平衡</button></td>
+                        </tr>
+                        <tr>
+                            <td>货币基金ETF</td>
+                            <td class="target-percentage">20%</td>
+                            <td><input type="number" class="amount-input" id="moneyFund" placeholder="输入金额" min="0"
+                                    step="100"></td>
+                            <td class="percentage" id="moneyFund-percentage">0%</td>
+                            <td class="status normal" id="moneyFund-status">正常</td>
+                            <td>12%-28%</td>
+                            <td><button class="action-btn" onclick="showRebalance('moneyFund')">再平衡</button></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>总计</td>
+                            <td>100%</td>
+                            <td id="total-input">¥0.00</td>
+                            <td id="total-percentage">100%</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div id="rebalanceSuggestion" class="rebalance-suggestion" style="display: none;">
@@ -893,7 +897,7 @@
 
     <script>
         // 页面加载时更新目标比例
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // 动态更新表格中的目标比例
             Object.keys(portfolioConfig).forEach(assetKey => {
                 const row = document.getElementById(assetKey).closest('tr');
@@ -909,25 +913,25 @@
         // 总金额分配功能
         function allocateTotalAmount() {
             const totalAmount = parseFloat(document.getElementById('totalInvestmentAmount').value) || 0;
-            
+
             if (totalAmount <= 0) {
                 alert('请输入有效的总投资金额');
                 return;
             }
-            
+
             // 根据目标比例分配金额
             Object.keys(portfolioConfig).forEach(assetKey => {
                 const targetPercentage = portfolioConfig[assetKey].target;
                 const allocatedAmount = (totalAmount * targetPercentage) / 100;
                 // 四舍五入到最近的整数
                 const roundedAmount = Math.round(allocatedAmount);
-                
+
                 const inputElement = document.getElementById(assetKey);
                 if (inputElement) {
                     inputElement.value = roundedAmount;
                 }
             });
-            
+
             // 重新计算组合配置
             calculatePortfolio();
         }
@@ -937,7 +941,7 @@
             const afterOperationsGrid = document.querySelector('.after-operations-grid');
             const afterTotalAmount = document.getElementById('after-total-amount');
             const targetDeviation = document.getElementById('target-deviation');
-            
+
             // 计算操作后的金额
             const afterAmounts = {};
             Object.keys(portfolioConfig).forEach(assetKey => {
@@ -950,10 +954,10 @@
                     afterAmounts[assetKey] = 0;
                 }
             });
-            
+
             // 计算操作后总金额
             const afterTotal = Object.values(afterAmounts).reduce((sum, amount) => sum + amount, 0);
-            
+
             // 生成操作后配置HTML
             let afterHtml = '';
             Object.entries(afterAmounts).forEach(([assetKey, amount]) => {
@@ -962,7 +966,7 @@
                 const deviation = (percentage - targetPercentage).toFixed(1);
                 const deviationColor = Math.abs(deviation) > 2 ? '#dc3545' : '#28a745';
                 const deviationIcon = Math.abs(deviation) > 2 ? '⚠️' : '✅';
-                
+
                 afterHtml += `
                     <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -970,7 +974,7 @@
                             <span style="font-size: 12px; color: #6c757d;">${deviationIcon} ${deviation}%</span>
                         </div>
                         <div style="font-size: 16px; font-weight: bold; color: #28a745; margin-bottom: 4px;">
-                            ¥${amount.toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            ¥${amount.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <div style="font-size: 12px; color: #6c757d;">
                             当前: ${percentage}% | 目标: ${targetPercentage}%
@@ -981,12 +985,12 @@
                     </div>
                 `;
             });
-            
+
             afterOperationsGrid.innerHTML = afterHtml;
-            
+
             // 更新总金额
-            afterTotalAmount.textContent = `¥${afterTotal.toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            
+            afterTotalAmount.textContent = `¥${afterTotal.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
             // 计算整体偏差
             let totalDeviation = 0;
             Object.entries(afterAmounts).forEach(([assetKey, amount]) => {
@@ -994,30 +998,29 @@
                 const targetPercentage = portfolioConfig[assetKey].target;
                 totalDeviation += Math.abs(percentage - targetPercentage);
             });
-            
+
             const avgDeviation = (totalDeviation / Object.keys(portfolioConfig).length).toFixed(1);
             const deviationColor = avgDeviation > 3 ? '#dc3545' : avgDeviation > 1.5 ? '#ffc107' : '#28a745';
             const deviationText = avgDeviation > 3 ? '偏差较大' : avgDeviation > 1.5 ? '轻微偏差' : '配置良好';
-            
+
             targetDeviation.innerHTML = `<span style="color: ${deviationColor};">${avgDeviation}% (${deviationText})</span>`;
         }
 
 
 
         const portfolioConfig = {
-            dividend: { name: '红利ETF', target: 10, min: 6, max: 14 },
             nasdaq: { name: '纳指ETF', target: 12.5, min: 7.5, max: 17.5 },
             csa500: { name: '中证A500 ETF', target: 12.5, min: 7.5, max: 17.5 },
-            bond30: { name: '30年国债ETF', target: 20, min: 12, max: 28 },
+            bond30: { name: '30年国债ETF', target: 30, min: 20, max: 40 },
             gold: { name: '黄金ETF', target: 25, min: 15, max: 35 },
             moneyFund: { name: '货币基金ETF', target: 20, min: 12, max: 28 },
         };
 
         function calculatePortfolio() {
-            const assets = ['dividend', 'nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
+            const assets = ['nasdaq', 'csa500', 'bond30', 'gold', 'moneyFund'];
             let totalAmount = 0;
             const amounts = {};
-            
+
             // 计算总金额
             assets.forEach(asset => {
                 const amount = parseFloat(document.getElementById(asset).value) || 0;
@@ -1026,8 +1029,8 @@
             });
 
             // 更新总计显示
-            document.getElementById('totalAmount').textContent = `¥${totalAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
-            document.getElementById('total-input').textContent = `¥${totalAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalAmount').textContent = `¥${totalAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
+            document.getElementById('total-input').textContent = `¥${totalAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
 
             if (totalAmount === 0) {
                 document.getElementById('overallStatus').textContent = '未配置';
@@ -1039,25 +1042,25 @@
             const rebalanceNeeds = [];
             const buyNeeds = [];
             const sellNeeds = [];
-            
+
             // 计算每个资产的百分比和状态
             assets.forEach(asset => {
                 const percentage = (amounts[asset] / totalAmount * 100);
                 document.getElementById(`${asset}-percentage`).textContent = `${percentage.toFixed(2)}%`;
-                
+
                 // 调试代码：检查百分比计算
                 console.log(`DEBUG - ${asset}金额=${amounts[asset]}，总金额=${totalAmount}，计算百分比=${percentage}%`);
-                
+
                 // 检查股票ETF的情况
                 if (asset === 'nasdaq' || asset === 'csa500') {
                     const config = portfolioConfig[asset];
                     console.log(`DEBUG - ${config.name}：min=${config.min}%，target=${config.target}%，max=${config.max}%`);
                     console.log(`DEBUG - ${config.name}：percentage > config.max = ${percentage > config.max}`);
                 }
-                
+
                 const config = portfolioConfig[asset];
                 const statusElement = document.getElementById(`${asset}-status`);
-                
+
                 if (percentage < config.min) {
                     statusElement.textContent = '偏低';
                     statusElement.className = 'status warning';
@@ -1085,11 +1088,11 @@
                     hasWarning = true;
                     const targetAmount = (config.target / 100 * totalAmount);
                     const excess = amounts[asset] - targetAmount;
-                    
+
                     // 调试代码：检查超出金额计算
                     console.log(`DEBUG - ${asset}偏高：当前金额=${amounts[asset]}，目标金额=${targetAmount}，超出金额=${excess}`);
                     console.log(`DEBUG - ${asset}当前比例=${percentage}%，目标比例=${config.target}%，超出比例=${percentage - config.target}%`);
-                    
+
                     sellNeeds.push({
                         asset: asset,
                         name: config.name,
@@ -1151,69 +1154,69 @@
                     statusElement.className = 'status normal';
                 }
             });
-            
+
             // 改进的卖出资产排序：仅按超出目标比例程度从高到低排序
             // 超出比例越大的资产优先卖出
             sellNeeds.sort((a, b) => {
                 // 仅按超出目标比例程度从高到低排序
                 return b.excessRatio - a.excessRatio;
             });
-            
+
             // 调试代码：检查卖出需求排序后的结果
             console.log('DEBUG - 排序后的卖出需求:', sellNeeds);
             console.log('DEBUG - 卖出需求数量:', sellNeeds.length);
-            
+
             // 将排序后的卖出需求添加到再平衡需求中
             sellNeeds.forEach(sellNeed => {
                 console.log(`DEBUG - 添加卖出需求：${sellNeed.asset}，金额：${sellNeed.amount}`);
                 rebalanceNeeds.push(sellNeed);
             });
-            
+
             // 调试代码：检查再平衡需求数组
             console.log('DEBUG - 添加卖出需求后的再平衡需求数组:', rebalanceNeeds);
             console.log('DEBUG - 再平衡需求数量:', rebalanceNeeds.length);
-            
 
-            
+
+
             // 特殊情况处理：确保严重偏低的资产能够获得足够资金达到目标比例
             // 包括：1) 仅使用偏高资产的超出部分不足时，从正常资产适度调整
             //      2) 优先处理严重偏低的资产（如原油低于最小值很多）
-            
+
             // 计算总卖出金额（从偏高资产）
             const totalSellFromHigh = rebalanceNeeds.filter(n => n.action === 'sell').reduce((sum, item) => sum + item.amount, 0);
-            
+
             // 计算总买入需求
             const totalBuyNeeded = buyNeeds.reduce((sum, item) => sum + item.needed, 0);
-            
+
             // 找出严重偏低的资产（低于最小值较多的）
             const severelyUnderweight = buyNeeds.filter(item => {
                 const shortageRatio = (item.target - item.current) / (item.target - portfolioConfig[item.asset].min);
                 return shortageRatio > 0.5; // 超过50%的不足比例视为严重偏低
             });
-            
+
             console.log('严重偏低的资产:', severelyUnderweight);
             console.log('总卖出金额（偏高资产）:', totalSellFromHigh);
             console.log('总买入需求:', totalBuyNeeded);
-            
+
             // 如果总卖出金额不足以满足买入需求，或者有严重偏低资产需要额外资金
             if (totalSellFromHigh < totalBuyNeeded || severelyUnderweight.length > 0) {
                 console.log('启动增强型再平衡逻辑：需要从正常资产中适度调整以满足买入需求');
-                
+
                 // 计算需要额外卖出的金额
                 const additionalSellNeeded = Math.max(0, totalBuyNeeded - totalSellFromHigh);
-                
+
                 // 找出可以适度调整的正常资产（排除严重偏低的资产）
                 const adjustableAssets = [];
                 assets.forEach(asset => {
                     // 跳过需要买入的资产
                     if (buyNeeds.some(b => b.asset === asset)) return;
-                    
+
                     // 跳过已经在卖出列表中的资产
                     if (rebalanceNeeds.some(n => n.action === 'sell' && n.asset === asset)) return;
-                    
+
                     const config = portfolioConfig[asset];
                     const percentage = (amounts[asset] / totalAmount * 100);
-                    
+
                     // 考虑正常范围内的资产，可以适度调整
                     if (percentage >= config.min && percentage <= config.max) {
                         // 计算可以安全卖出的金额
@@ -1224,7 +1227,7 @@
                             amounts[asset] - minSafeAmount,
                             amounts[asset] * 0.10 // 最多卖出10%
                         );
-                        
+
                         if (maxSellAmount > 0) {
                             adjustableAssets.push({
                                 asset: asset,
@@ -1237,7 +1240,7 @@
                         }
                     }
                 });
-                
+
                 // 按照超出目标比例程度从高到低排序
                 adjustableAssets.sort((a, b) => {
                     const aExcessRatio = a.percentage - a.config.target;
@@ -1246,18 +1249,18 @@
                     return bExcessRatio - aExcessRatio;
                 });
                 console.log('可调整的正常资产（按超出目标比例从高到低排序）:', adjustableAssets);
-                
+
                 // 从这些资产中分配额外需要的卖出金额
                 let additionalSellAllocated = 0;
                 adjustableAssets.forEach(assetInfo => {
                     if (additionalSellAllocated >= additionalSellNeeded && severelyUnderweight.length === 0) return;
-                    
+
                     // 计算可以卖出的金额
                     let sellAmount = Math.min(
                         assetInfo.maxSellAmount,
                         additionalSellNeeded - additionalSellAllocated
                     );
-                    
+
                     // 对于严重偏低的情况，可以稍微多卖出一些以确保满足需求
                     if (severelyUnderweight.length > 0 && sellAmount > 0) {
                         // 可以适度增加卖出比例
@@ -1266,7 +1269,7 @@
                             assetInfo.maxSellAmount
                         );
                     }
-                    
+
                     if (sellAmount > 0) {
                         console.log(`从正常资产${assetInfo.name}适度卖出: ¥${sellAmount}`);
                         rebalanceNeeds.push({
@@ -1280,7 +1283,7 @@
                         additionalSellAllocated += sellAmount;
                     }
                 });
-                
+
                 console.log('额外卖出金额已分配:', additionalSellAllocated);
             }
 
@@ -1290,9 +1293,9 @@
             const bond30CurrentAmount = amounts.bond30 || 0;
             const bond30TargetAmount = (bond30Config.target / 100) * totalAmount;
             const bond30NeededAmount = bond30TargetAmount - bond30CurrentAmount;
-            
+
             console.log(`30年国债ETF：当前${bond30CurrentAmount}，目标${bond30TargetAmount}，需要${bond30NeededAmount}`);
-            
+
             // 如果30年国债ETF需要买入
             if (bond30NeededAmount > 0) {
                 // 更新rebalanceNeeds数组中对应的bond30买入需求项的金额
@@ -1312,7 +1315,7 @@
                     });
                     console.log(`添加30年国债ETF买入需求：${bond30NeededAmount}元`);
                 }
-                
+
 
             }
 
@@ -1324,7 +1327,7 @@
             console.log('DEBUG - calculateRebalance: rebalanceNeeds:', rebalanceNeeds);
             console.log('DEBUG - calculateRebalance: sellNeeds:', sellNeeds);
             console.log('DEBUG - calculateRebalance: buyNeeds:', buyNeeds);
-            
+
             // 显示再平衡建议
             if (rebalanceNeeds.length > 0) {
                 console.log('DEBUG - calculateRebalance: 调用showRebalanceSuggestions');
@@ -1341,11 +1344,11 @@
         function showRebalanceSuggestions(needs, totalAmount) {
             const suggestionDiv = document.getElementById('rebalanceSuggestion');
             const contentDiv = document.getElementById('rebalanceContent');
-            
+
             let html = '';
             const sellAssets = needs.filter(n => n.action === 'sell');
             const buyAssets = needs.filter(n => n.action === 'buy');
-            
+
             // 买入资产仅按目标比例差（target - current）从大到小排序
             // 移除所有资产类型优先级
             buyAssets.sort((a, b) => {
@@ -1353,49 +1356,49 @@
                 const diffB = b.target - b.current;
                 return diffB - diffA;
             });
-            
+
             // 调试代码：检查买入资产排序后的结果
             console.log('DEBUG - 排序后的买入资产:', buyAssets);
-            
+
             // 调试代码：检查卖出需求
             console.log('DEBUG - rebalanceNeeds:', needs);
             console.log('DEBUG - sellAssets:', sellAssets);
             console.log('DEBUG - buyAssets:', buyAssets);
-            
+
             // 计算总卖出金额和总买入需求
             let totalSellAmount = 0;
             let totalBuyAmount = 0;
-            
+
             // 调试：检查每个卖出资产的amount值和累加过程
             sellAssets.forEach(item => {
                 console.log(`DEBUG - 卖出资产：${item.name}，amount：${item.amount}，类型：${typeof item.amount}`);
                 totalSellAmount += item.amount;
                 console.log(`DEBUG - 累加后totalSellAmount：${totalSellAmount}`);
             });
-            
+
             // 调试：检查每个买入资产的amount值和累加过程
             buyAssets.forEach(item => {
                 console.log(`DEBUG - 买入资产：${item.name}，amount：${item.amount}，类型：${typeof item.amount}`);
                 totalBuyAmount += item.amount;
                 console.log(`DEBUG - 累加后totalBuyAmount：${totalBuyAmount}`);
             });
-            
+
             // 调试代码：检查金额计算
             console.log('DEBUG - totalSellAmount:', totalSellAmount);
             console.log('DEBUG - totalBuyAmount:', totalBuyAmount);
-            
+
             // 检查浮点数精度问题
             console.log('DEBUG - totalSellAmount > 0:', totalSellAmount > 0);
             console.log('DEBUG - totalSellAmount.toFixed(2):', totalSellAmount.toFixed(2));
             console.log('DEBUG - Math.abs(totalSellAmount) > 0.01:', Math.abs(totalSellAmount) > 0.01);
-            
+
             // 调试：打印传入的buyAssets
             console.log('DEBUG - 传入的buyAssets:', buyAssets);
-            
+
             // 调试代码：检查是否显示再平衡方案
             console.log('DEBUG - 是否显示再平衡方案:', totalSellAmount > 0 || totalBuyAmount > 0);
             console.log('DEBUG - 使用阈值判断:', Math.abs(totalSellAmount) > 0.01 || Math.abs(totalBuyAmount) > 0.01);
-            
+
             // 如果有买卖操作，显示清晰的再平衡方案
             // 使用阈值0.01来处理浮点数精度问题
             if (Math.abs(totalSellAmount) > 0.01 || Math.abs(totalBuyAmount) > 0.01) {
@@ -1408,24 +1411,24 @@
                             <div style="padding: 15px; background: #fff5f5; border-radius: 8px; border-left: 4px solid #dc3545;">
                                 <h4 style="margin: 0 0 15px 0; color: #dc3545;">💰 卖出操作</h4>
                 `;
-                
+
                 sellAssets.forEach(item => {
                     const percentage = ((item.amount / totalAmount) * 100).toFixed(2);
                     html += `
                         <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 5px; border: 1px solid #ffebee;">
                             <div style="font-weight: bold; color: #d32f2f; margin-bottom: 5px;">${item.name}</div>
                             <div style="color: #666; font-size: 0.9em;">
-                                卖出金额：<span style="color: #d32f2f; font-weight: bold;">¥${item.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                                卖出金额：<span style="color: #d32f2f; font-weight: bold;">¥${item.amount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                                 (${percentage}%)
                             </div>
                         </div>
                     `;
                 });
-                
+
                 html += `
                                 <div style="margin-top: 15px; padding-top: 15px; border-top: 2px dashed #ffcdd2;">
                                     <div style="font-weight: bold; color: #d32f2f;">
-                                        总卖出：<span style="font-size: 1.2em;">¥${totalSellAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                                        总卖出：<span style="font-size: 1.2em;">¥${totalSellAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1434,116 +1437,116 @@
                             <div style="padding: 15px; background: #f0fff4; border-radius: 8px; border-left: 4px solid #28a745;">
                                 <h4 style="margin: 0 0 15px 0; color: #28a745;">🛒 买入操作</h4>
                 `;
-                
+
                 // 获取当前金额并计算买入分配
                 const currentAmounts = {};
-                ['dividend', 'nasdaq', 'csa500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
+                ['nasdaq', 'csa500', 'bond30', 'moneyFund', 'gold'].forEach(asset => {
                     const element = document.getElementById(asset);
                     currentAmounts[asset] = element ? parseFloat(element.value) || 0 : 0;
                 });
-                
+
                 // 计算可用资金：总卖出金额
                 const availableFunds = totalSellAmount;
                 console.log('DEBUG - availableFunds设置为总卖出金额: ¥' + availableFunds);
-                
+
                 // 调试：打印黄金和债券ETF的详细信息
-                console.log('黄金ETF当前配置：', {amount: currentAmounts.gold, percentage: (currentAmounts.gold/totalAmount)*100, target: portfolioConfig.gold.target});
-                console.log('30年国债ETF当前配置：', {amount: currentAmounts.bond30, percentage: (currentAmounts.bond30/totalAmount)*100, target: portfolioConfig.bond30.target});
+                console.log('黄金ETF当前配置：', { amount: currentAmounts.gold, percentage: (currentAmounts.gold / totalAmount) * 100, target: portfolioConfig.gold.target });
+                console.log('30年国债ETF当前配置：', { amount: currentAmounts.bond30, percentage: (currentAmounts.bond30 / totalAmount) * 100, target: portfolioConfig.bond30.target });
                 let remainingFunds = availableFunds;
                 const idealAllocations = {};
-                
+
                 // 调试信息
                 console.log('=== 再平衡调试信息 ===');
                 console.log('总卖出金额:', totalSellAmount);
                 console.log('总买入需求:', totalBuyAmount);
                 console.log('当前配置:', currentAmounts);
                 console.log('买入资产列表:', buyAssets);
-                
 
-                
+
+
                 // 计算所有需要买入的资产及其比例差值
                 let assetsNeedingIncrease = [];
                 let totalPercentageDiff = 0;
-                
+
                 // 收集所有需要买入的资产（排除已卖出的资产）
                 const allAssets = Object.keys(portfolioConfig);
                 allAssets.forEach(assetKey => {
                     // 跳过已经卖出的资产
                     if (sellAssets.some(sell => sell.asset === assetKey)) return;
-                    
+
                     const config = portfolioConfig[assetKey];
                     const currentAmount = currentAmounts[assetKey];
                     const currentPercentage = (currentAmount / totalAmount) * 100;
                     const diff = config.target - currentPercentage;
-                    
+
                     // 只要比例低于目标，就认为需要增加
                     if (diff > 0) {
-                        assetsNeedingIncrease.push({asset: assetKey, diff: diff, target: config.target});
+                        assetsNeedingIncrease.push({ asset: assetKey, diff: diff, target: config.target });
                         totalPercentageDiff += diff;
                     }
                 });
-                
+
                 console.log('比例低于目标的资产:', assetsNeedingIncrease);
                 console.log('总比例差值:', totalPercentageDiff);
-                
+
                 // 如果有比例低于目标的资产，则按比例差值分配卖出资金
                 if (assetsNeedingIncrease.length > 0 && totalPercentageDiff > 0 && remainingFunds > 0) {
                     // 按比例差值分配资金
                     assetsNeedingIncrease.forEach(item => {
                         if (remainingFunds <= 0.01) return;
-                        
+
                         // 计算该资产应分配的资金比例
                         const allocationRatio = item.diff / totalPercentageDiff;
                         const allocateAmount = remainingFunds * allocationRatio;
-                        
+
                         // 确保不会过度买入超过目标
                         const currentAmount = currentAmounts[item.asset];
                         const targetAmount = (item.target / 100) * totalAmount;
                         const maxAllocation = Math.max(0, targetAmount - currentAmount);
                         const finalAmount = Math.min(allocateAmount, maxAllocation);
-                        
+
                         idealAllocations[item.asset] = (idealAllocations[item.asset] || 0) + finalAmount;
                         remainingFunds -= finalAmount;
                         console.log(`DEBUG - 为${item.asset}按比例差值分配金额: ¥${finalAmount}`);
                     });
                 }
-                
+
                 // 将剩余资金分配给需要的资产，优先考虑非债券类和偏低资产
                 if (remainingFunds > 0.01) {
                     console.log('开始处理剩余资金:', remainingFunds);
-                    
+
                     // 优先检查是否有真正需要买入的资产（如原油等）还未满足需求
                     const stillNeedsBuying = buyAssets.filter(item => {
                         const allocated = idealAllocations[item.asset] || 0;
                         return allocated < item.amount; // 还未满足买入需求
                     });
-                    
+
                     console.log('仍需买入的资产:', stillNeedsBuying);
-                    
+
                     // 如果有资产仍需买入，优先分配给这些资产
                     if (stillNeedsBuying.length > 0) {
                         stillNeedsBuying.forEach(need => {
                             if (remainingFunds <= 0.01) return;
-                            
+
                             const additionalAllocation = Math.min(need.amount - (idealAllocations[need.asset] || 0), remainingFunds);
                             idealAllocations[need.asset] = (idealAllocations[need.asset] || 0) + additionalAllocation;
                             remainingFunds -= additionalAllocation;
                             console.log(`将额外${additionalAllocation}分配给仍需买入的${need.asset}`);
                         });
                     }
-                    
+
                     // 检查货币基金的当前比例，避免过度分配
                     if (remainingFunds > 0.01 && Object.keys(portfolioConfig).includes('moneyFund')) {
                         const moneyFundConfig = portfolioConfig.moneyFund;
                         const currentMoneyFundAmount = currentAmounts.moneyFund + (idealAllocations.moneyFund || 0);
                         const currentMoneyFundPercentage = (currentMoneyFundAmount / totalAmount) * 100;
-                        
+
                         console.log(`货币基金当前比例: ${currentMoneyFundPercentage.toFixed(2)}%, 最大值: ${moneyFundConfig.max}%`);
-                        
+
                         // 如果货币基金已经接近或超过最大值，则不分配或减少分配
                         if (currentMoneyFundPercentage >= moneyFundConfig.max - 0.5) {
                             console.log('货币基金已接近或超过最大值，优先考虑其他资产');
-                            
+
                             // 尝试分配给30年国债ETF
                             if (Object.keys(portfolioConfig).includes('bond30')) {
                                 idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
@@ -1551,13 +1554,13 @@
                                 remainingFunds = 0;
                             } else {
                                 // 检查是否有其他正常范围内的资产可以接收资金
-                                const otherAssets = ['dividend', 'nasdaq', 'csa500', 'gold'].filter(asset => {
+                                const otherAssets = ['nasdaq', 'csa500', 'gold'].filter(asset => {
                                     const config = portfolioConfig[asset];
                                     const currentAmount = currentAmounts[asset] + (idealAllocations[asset] || 0);
                                     const currentPercentage = (currentAmount / totalAmount) * 100;
                                     return currentPercentage < config.max - 0.5; // 仍有空间
                                 });
-                                
+
                                 if (otherAssets.length > 0) {
                                     // 按优先级分配给其他资产
                                     otherAssets.forEach(asset => {
@@ -1583,18 +1586,18 @@
                         idealAllocations.bond30 = (idealAllocations.bond30 || 0) + remainingFunds;
                         console.log('剩余资金分配给30年国债ETF:', remainingFunds);
                     }
-                    
+
                     if (remainingFunds > 0.01) {
                         console.log('最终仍有剩余资金:', remainingFunds);
                     }
                 }
-                
+
                 console.log('最终分配结果:', idealAllocations);
                 console.log('总分配金额:', Object.values(idealAllocations).reduce((sum, amount) => sum + amount, 0));
-                
+
                 // 计算并显示操作后的配置
                 displayAfterOperations(currentAmounts, sellAssets, idealAllocations, totalAmount);
-                
+
                 // 显示买入分配
                 Object.entries(idealAllocations).forEach(([assetKey, amount]) => {
                     if (amount > 0) {
@@ -1608,21 +1611,21 @@
                             <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 5px; border: 1px solid #e8f5e8;">
                                 <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">${config.name}</div>
                                 <div style="color: #666; font-size: 0.9em;">
-                                    买入金额：<span style="color: #2e7d32; font-weight: bold;">¥${amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                                    买入金额：<span style="color: #2e7d32; font-weight: bold;">¥${amount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                                     <div>买入后比例：<span style="color: #2e7d32; font-weight: bold;">${newPercentage}%</span> (目标: ${targetPercentage}%)</div>
                                 </div>
                             </div>
                         `;
                     }
                 });
-                
+
                 const totalBuy = Object.values(idealAllocations).reduce((sum, amount) => sum + amount, 0);
                 const remaining = totalSellAmount - totalBuy;
-                
+
                 html += `
                                 <div style="margin-top: 15px; padding-top: 15px; border-top: 2px dashed #c8e6c9;">
                                     <div style="font-weight: bold; color: #2e7d32;">
-                                        总买入：<span style="font-size: 1.2em;">¥${totalBuy.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                                        总买入：<span style="font-size: 1.2em;">¥${totalBuy.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1633,43 +1636,43 @@
                             <h4 style="margin: 0 0 10px 0; color: #1976d2; font-size: 1.1em;">💱 资金流向</h4>
                             <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
                                 <div style="padding: 8px 16px; background: #ffebee; border-radius: 20px; color: #d32f2f; font-weight: bold;">
-                                    卖出 ¥${totalSellAmount.toLocaleString('zh-CN', {minimumFractionDigits: 0})}
+                                    卖出 ¥${totalSellAmount.toLocaleString('zh-CN', { minimumFractionDigits: 0 })}
                                 </div>
                                 <div style="font-size: 1.5em; color: #1976d2;">→</div>
                                 <div style="padding: 8px 16px; background: #e8f5e8; border-radius: 20px; color: #2e7d32; font-weight: bold;">
-                                    买入 ¥${totalBuy.toLocaleString('zh-CN', {minimumFractionDigits: 0})}
+                                    买入 ¥${totalBuy.toLocaleString('zh-CN', { minimumFractionDigits: 0 })}
                                 </div>
                 `;
-                
+
                 if (remaining > 0) {
                     html += `
                                 <div style="padding: 8px 16px; background: #fff3e0; border-radius: 20px; color: #f57c00; font-weight: bold;">
-                                    剩余 ¥${remaining.toLocaleString('zh-CN', {minimumFractionDigits: 2})}
+                                    剩余 ¥${remaining.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
                                 </div>
                     `;
                 }
-                
+
                 html += `
                             </div>
                         </div>
                     </div>
                 `;
-                
+
                 // 债券比例分析
                 const currentBond30 = currentAmounts.bond30 + (idealAllocations.bond30 || 0);
                 const currentBond3_5 = currentAmounts.bond3_5 + (idealAllocations.bond3_5 || 0);
                 const totalBonds = currentBond30 + currentBond3_5;
-                
+
                 if (totalBonds > 0) {
                     const bond30Ratio = (currentBond30 / totalBonds * 100).toFixed(1);
                     const bond3_5Ratio = (currentBond3_5 / totalBonds * 100).toFixed(1);
                     const targetBond30Ratio = 72.7;
                     const targetBond3_5Ratio = 27.3;
-                    
+
                     let balanceStatus = '';
                     let statusColor = '#0c5460';
                     let statusIcon = '📊';
-                    
+
                     if (Math.abs(parseFloat(bond30Ratio) - targetBond30Ratio) <= 5) {
                         balanceStatus = '✅ 债券比例平衡良好，符合长期累积策略';
                         statusColor = '#155724';
@@ -1687,7 +1690,7 @@
                         statusColor = '#0c5460';
                         statusIcon = '🔄';
                     }
-                    
+
                     html += `
                         <div class="rebalance-item" style="border-left-color: #17a2b8; background-color: #d1ecf1; margin-top: 20px;">
                             <strong>${statusIcon} 债券内部比例平衡分析</strong><br>
@@ -1705,77 +1708,77 @@
                         </div>
                     `;
                 }
-                
+
                 html += `<p style="margin-top: 15px; color: #666; text-align: center;">💡 提示：资金分配优先级：股票/黄金资产 → 债券资产</p>`;
             }
-            
+
             contentDiv.innerHTML = html;
             suggestionDiv.style.display = 'block';
         }
 
         function calculateAdditionalAllocation() {
             const additionalAmount = parseFloat(document.getElementById('additionalAmount').value);
-            
+
             if (isNaN(additionalAmount) || additionalAmount <= 0) {
                 alert('请输入有效的加仓金额');
                 return;
             }
-            
+
             // 获取当前各资产的金额
             const currentAmounts = {};
             let totalCurrentAmount = 0;
-            
+
             Object.keys(portfolioConfig).forEach(asset => {
                 const amount = parseFloat(document.getElementById(asset).value) || 0;
                 currentAmounts[asset] = amount;
                 totalCurrentAmount += amount;
             });
-            
+
             if (totalCurrentAmount === 0) {
                 alert('请先输入当前投资金额并点击"计算组合配置"');
                 return;
             }
-            
+
             // 设置资产分配优先级：纳指→中证A500→黄金→30年国债→货币基金
-            const assetPriorityOrder = ['dividend', 'nasdaq', 'csa500', 'gold', 'bond30', 'moneyFund'];
-            
+            const assetPriorityOrder = ['nasdaq', 'csa500', 'gold', 'bond30', 'moneyFund'];
+
             // 初始化分配金额
             const allocationAmounts = {};
             Object.keys(portfolioConfig).forEach(asset => {
                 allocationAmounts[asset] = 0;
             });
-            
+
             // 按优先级顺序分配加仓金额
             let remainingAmount = additionalAmount;
-            
+
             // 计算总目标比例
             const totalTargetPercentage = Object.values(portfolioConfig).reduce((sum, config) => sum + config.target, 0);
-            
+
             // 第一步：计算每个资产按照目标比例应分配的加仓金额
             const targetAllocations = {};
             Object.keys(portfolioConfig).forEach(asset => {
                 const config = portfolioConfig[asset];
                 targetAllocations[asset] = (config.target / totalTargetPercentage) * additionalAmount;
             });
-            
+
             // 第二步：按优先级分配，确保股票、黄金和货币基金先获得分配
             for (const asset of assetPriorityOrder) {
                 if (remainingAmount <= 0) break;
-                
+
                 // 跳过货币基金，最后处理
                 if (asset === 'moneyFund') continue;
-                
+
                 // 分配目标金额
                 const allocateAmount = Math.min(remainingAmount, targetAllocations[asset]);
                 allocationAmounts[asset] = allocateAmount;
                 remainingAmount -= allocateAmount;
             }
-            
+
             // 第三步：处理30年国债
             if (remainingAmount > 0) {
                 // 计算30年国债应分配的金额
                 const bond30Target = targetAllocations.bond30;
-                
+
                 // 直接分配30年国债的目标金额
                 if (remainingAmount >= bond30Target) {
                     // 分配完整的目标金额
@@ -1787,31 +1790,31 @@
                     remainingAmount = 0;
                 }
             }
-            
+
             // 如果还有剩余金额，全部分配给30年国债
             if (remainingAmount > 0) {
                 allocationAmounts.bond30 += remainingAmount;
                 remainingAmount = 0;
             }
-            
+
             // 计算实际分配总额
             let totalAllocated = Object.values(allocationAmounts).reduce((sum, amount) => sum + amount, 0);
             let remainingFunds = additionalAmount - totalAllocated;
-            
+
             // 确保所有剩余资金都被分配给货币基金
             if (remainingFunds > 0.01) {
                 allocationAmounts.moneyFund += remainingFunds;
             }
-            
+
             // 再次计算总分配金额以确保准确性
             totalAllocated = Object.values(allocationAmounts).reduce((sum, amount) => sum + amount, 0);
             let roundingError = additionalAmount - totalAllocated;
-            
+
             // 处理舍入误差，添加到货币基金
             if (Math.abs(roundingError) > 0.01) {
                 allocationAmounts.moneyFund += roundingError;
             }
-            
+
             // 生成分配结果HTML
             let html = `
                 <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -1821,28 +1824,28 @@
                     <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-weight: 500; color: #495057;">加仓金额：</span>
-                            <span style="font-weight: bold; color: #28a745;">¥${additionalAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                            <span style="font-weight: bold; color: #28a745;">¥${additionalAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-weight: 500; color: #495057;">当前总金额：</span>
-                            <span style="font-weight: bold; color: #495057;">¥${totalCurrentAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                            <span style="font-weight: bold; color: #495057;">¥${totalCurrentAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: 500; color: #495057;">加仓后总金额：</span>
-                            <span style="font-weight: bold; color: #1976d2;">¥${(totalCurrentAmount + additionalAmount).toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                            <span style="font-weight: bold; color: #1976d2;">¥${(totalCurrentAmount + additionalAmount).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</span>
                         </div>
                     </div>
                     
                     <h5 style="color: #343a40; margin-bottom: 10px; font-size: 16px;">建议加仓明细：</h5>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
             `;
-            
+
             Object.entries(allocationAmounts).forEach(([asset, amount]) => {
                 if (amount > 0) {
                     const config = portfolioConfig[asset];
                     const percentage = ((amount / additionalAmount) * 100).toFixed(2);
                     const statusColor = amount > 0 ? '#28a745' : '#dc3545';
-                    
+
                     html += `
                         <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${statusColor};">
                             <div style="font-weight: bold; color: #495057; margin-bottom: 5px;">${config.name}</div>
@@ -1850,7 +1853,7 @@
                                 目标比例：${config.target}%
                             </div>
                             <div style="color: ${statusColor}; font-weight: bold; font-size: 1.1em;">
-                                加仓金额：¥${amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}
+                                加仓金额：¥${amount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
                             </div>
                             <div style="color: #666; font-size: 0.9em;">
                                 占加仓比例：${percentage}%
@@ -1859,7 +1862,7 @@
                     `;
                 }
             });
-            
+
             html += `
                     </div>
                     
@@ -1873,46 +1876,47 @@
                     </div>
                 </div>
             `;
-            
+
             // 显示结果
             const resultDiv = document.getElementById('additionalAllocationResult');
             resultDiv.innerHTML = html;
             resultDiv.style.display = 'block';
-            
+
             // 调用displayAfterOperations函数显示操作后配置预览
             const newTotalAmount = totalCurrentAmount + additionalAmount;
             displayAfterOperations(currentAmounts, [], allocationAmounts, newTotalAmount);
         }
-        
+
         function showRebalance(asset) {
             const config = portfolioConfig[asset];
             const currentAmount = parseFloat(document.getElementById(asset).value) || 0;
             const totalAmount = parseFloat(document.getElementById('totalAmount').textContent.replace('¥', '').replace(/,/g, '')) || 0;
-            
+
             if (totalAmount === 0) {
                 alert('请先输入投资金额并点击"计算组合配置"');
                 return;
             }
-            
+
             const targetAmount = config.target / 100 * totalAmount;
             const difference = targetAmount - currentAmount;
-            
+
             let message = `${config.name} 再平衡建议：\n\n`;
-            message += `当前金额: ¥${currentAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}\n`;
-            message += `目标金额: ¥${targetAmount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}\n`;
-            message += `差额: ¥${Math.abs(difference).toLocaleString('zh-CN', {minimumFractionDigits: 2})}\n\n`;
-            
+            message += `当前金额: ¥${currentAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}\n`;
+            message += `目标金额: ¥${targetAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}\n`;
+            message += `差额: ¥${Math.abs(difference).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}\n\n`;
+
             if (difference > 0) {
-                message += `建议买入 ¥${difference.toLocaleString('zh-CN', {minimumFractionDigits: 2})} 以达到目标配置`;
+                message += `建议买入 ¥${difference.toLocaleString('zh-CN', { minimumFractionDigits: 2 })} 以达到目标配置`;
             } else if (difference < 0) {
-                message += `建议卖出 ¥${Math.abs(difference).toLocaleString('zh-CN', {minimumFractionDigits: 2})} 以达到目标配置`;
+                message += `建议卖出 ¥${Math.abs(difference).toLocaleString('zh-CN', { minimumFractionDigits: 2 })} 以达到目标配置`;
             } else {
                 message += `当前配置已达到目标比例`;
             }
-            
+
             alert(message);
         }
 
     </script>
 </body>
+
 </html>
