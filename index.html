@@ -885,6 +885,21 @@
     </div>
 
     <script>
+        // 禁用右键菜单
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+
+        // 禁用F12、Ctrl+Shift+I等开发者工具快捷键
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+
         // 登录验证
         // 定义多组账号密码数据
         const validUsers = [
