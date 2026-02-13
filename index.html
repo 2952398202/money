@@ -239,6 +239,25 @@
             box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
         }
 
+        /* 删除按钮样式 */
+        .delete-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
+        }
+
         /* 确认操作按钮样式 */
         .confirm-btn {
             display: block;
@@ -802,6 +821,7 @@
                 <th>持仓金额</th>
                 <th>持仓收益</th>
                 <th>操作</th>
+                <th>删除</th>
             </tr>
         </thead>
         <tbody id="fundTbody">
@@ -1089,6 +1109,7 @@
                                     <td data-label="持仓金额" id="holding-value-${data.code}"><span>${holdingValue.toFixed(2)}</span></td>
                                     <td data-label="持仓收益" class="${profitClass}" id="profit-${data.code}"><span>${profit >= 0 ? `+${profit.toFixed(2)}` : profit.toFixed(2)}</span></td>
                                     <td data-label="操作"><button class="detail-btn" onclick="showFundDetails('${data.code}')">详情</button></td>
+                                    <td data-label="删除"><button class="delete-btn" onclick="event.stopPropagation(); deleteFund('${data.code}')">删除</button></td>
                             `;
 
                 // 将行加入表格
@@ -1540,6 +1561,36 @@
             // 更新用户持仓收益（如果有持仓）
             if (userHoldings[data.code]) {
                 loadUserHoldings(data.code, data.dwjz);
+            }
+        }
+
+        // 删除基金
+        function deleteFund(fundCode) {
+            if (confirm(`确定要删除基金 ${fundCode} 吗？`)) {
+                console.log('开始删除基金:', fundCode);
+
+                // 从fundCodes数组中删除该基金代码
+                fundCodes = fundCodes.filter(code => code !== fundCode);
+                localStorage.setItem('fundCodes', JSON.stringify(fundCodes));
+                console.log('删除后的fundCodes:', fundCodes);
+
+                // 从userHoldings中删除该基金的持仓数据
+                delete userHoldings[fundCode];
+                localStorage.setItem('userHoldings', JSON.stringify(userHoldings));
+
+                // 直接删除表格行
+                const row = document.getElementById(`fund-row-${fundCode}`);
+                console.log('找到的表格行:', row);
+                if (row) {
+                    row.remove();
+                    console.log('已删除表格行');
+                }
+
+                // 检查是否还有基金，如果没有则隐藏表格
+                if (fundCodes.length === 0) {
+                    document.getElementById("fundTable").style.display = "none";
+                    document.getElementById("loading").style.display = "none";
+                }
             }
         }
 
