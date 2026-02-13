@@ -661,6 +661,95 @@
             .operation-group input[type="number"] {
                 font-size: 13px;
             }
+
+            /* 小屏幕：表格卡片化显示，隐藏表头，增加可触控区域 */
+            .fund-table thead {
+                display: none;
+            }
+
+            .fund-table,
+            .fund-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            .fund-table tr {
+                display: block;
+                margin-bottom: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 8px;
+                padding: 8px 10px;
+            }
+
+            .fund-table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 6px;
+                border-bottom: none;
+                text-align: left;
+            }
+
+            .fund-table td::before {
+                content: attr(data-label);
+                color: #00d4ff;
+                font-weight: 600;
+                margin-right: 8px;
+                flex: 0 0 auto;
+            }
+
+            .fund-table td span {
+                flex: 1 1 auto;
+                text-align: right;
+            }
+
+            .fund-table td button {
+                flex: 0 0 auto;
+                margin-left: 8px;
+                text-align: center;
+                min-width: 72px;
+            }
+
+            /* 底部刷新按钮固定显示，避免被遮挡并防止点击时偏移 */
+            .refresh-btn {
+                position: fixed;
+                left: 16px;
+                right: 16px;
+                bottom: 12px;
+                width: auto;
+                max-width: 600px;
+                margin: 0 auto;
+                z-index: 2000;
+                padding: 14px 20px;
+                border-radius: 999px;
+                outline: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .refresh-btn:focus,
+            .refresh-btn:active {
+                outline: none;
+                box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            }
+
+            body {
+                padding-bottom: 84px;
+            }
+
+            /* 搜索框和按钮更大，方便触控 */
+            .search-container input {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .search-container button {
+                padding: 14px;
+                font-size: 16px;
+                width: 100%;
+            }
+
+            .detail-btn {
+                padding: 10px 14px;
+            }
         }
     </style>
 </head>
@@ -669,7 +758,7 @@
     <!-- 登录界面 -->
     <div class="login-container" id="loginContainer">
         <div class="login-form">
-            <h2>登录系统</h2>
+            <h2>实时估值查询系统</h2>
             <div class="form-group">
                 <label for="username">用户名</label>
                 <input type="text" id="username" placeholder="请输入用户名">
@@ -975,17 +1064,17 @@
 
                 // 拼接表格单元格（空值统一显示--，保证界面整洁）
                 tr.innerHTML = `
-                  <td>${data.code || "--"}</td>
-                  <td>${data.name || "--"}</td>
-                  <td class="${rateClass}" id="rate-${data.code}">${rateText}</td>
-                  <td class="${estimatedProfitClass}" id="estimated-profit-${data.code}">${estimatedProfit >= 0 ? `+${estimatedProfit.toFixed(2)}` : estimatedProfit.toFixed(2)}</td>
-                  <td id="dwjz-${data.code}">${data.dwjz || "--"}</td>
-                  <td class="${dayRateClass}" id="zzl-${data.code}">${dayRateText}</td>
-                  <td class="${halfMonthRateClass}" id="halfmonth-rate-${data.code}">${halfMonthRateText}</td>
-                  <td id="holding-value-${data.code}">${holdingValue.toFixed(2)}</td>
-                  <td class="${profitClass}" id="profit-${data.code}">${profit >= 0 ? `+${profit.toFixed(2)}` : profit.toFixed(2)}</td>
-                  <td><button class="detail-btn" onclick="showFundDetails('${data.code}')">详情</button></td>
-              `;
+                                    <td data-label="基金代码">${data.code || "--"}</td>
+                                    <td data-label="基金名称">${data.name || "--"}</td>
+                                    <td data-label="估值涨幅" class="${rateClass}" id="rate-${data.code}"><span>${rateText}</span></td>
+                                    <td data-label="预估收益" class="${estimatedProfitClass}" id="estimated-profit-${data.code}"><span>${estimatedProfit >= 0 ? `+${estimatedProfit.toFixed(2)}` : estimatedProfit.toFixed(2)}</span></td>
+                                    <td data-label="最新净值" id="dwjz-${data.code}"><span>${data.dwjz || "--"}</span></td>
+                                    <td data-label="日涨跌幅" class="${dayRateClass}" id="zzl-${data.code}"><span>${dayRateText}</span></td>
+                                    <td data-label="近半个月涨跌幅" class="${halfMonthRateClass}" id="halfmonth-rate-${data.code}"><span>${halfMonthRateText}</span></td>
+                                    <td data-label="持仓金额" id="holding-value-${data.code}"><span>${holdingValue.toFixed(2)}</span></td>
+                                    <td data-label="持仓收益" class="${profitClass}" id="profit-${data.code}"><span>${profit >= 0 ? `+${profit.toFixed(2)}` : profit.toFixed(2)}</span></td>
+                                    <td data-label="操作"><button class="detail-btn" onclick="showFundDetails('${data.code}')">详情</button></td>
+                            `;
 
                 // 将行加入表格
                 tbody.appendChild(tr);
